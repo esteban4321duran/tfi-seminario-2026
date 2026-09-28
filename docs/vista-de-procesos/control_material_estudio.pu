@@ -1,0 +1,38 @@
+@startuml
+title Control material de estudio
+
+|Secretario|
+start
+:1 vez por semana;
+
+if (hay material de estudio disponible) then (no)
+	stop
+else (sí)
+endif
+
+:Buscar alumnos a los que
+falta entregar su material
+de estudio;
+note right
+Planilla contabilidad
+2do cuatrimestre 2026
+end note
+
+:Esperar 1 día;
+
+repeat
+
+if (alumno pagó la inscripción completa?) then (sí)
+	:establecer como "entregar";
+	note right
+	Planilla contabilidad
+	2do cuatrimestre 2026
+	end note
+else (no)
+endif
+
+repeat while (falta entregar a otro?) is (sí) not (no)
+:esperar 1 día;
+
+stop
+@enduml

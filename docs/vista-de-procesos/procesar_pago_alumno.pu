@@ -1,0 +1,61 @@
+@startuml
+title Procesar pago de alumno
+
+|Secretario|
+start
+:Alumno desea realizar un pago;
+:Solicitar apellido, nombre y curso del Alumno;
+if (Alumno sabe qué debe pagar?) then (sí)
+	:Calcular precio;
+	note right 
+	Resumen Deuda
+	end note 
+	note right 
+	Planilla de Precios
+	end note 
+else (no)
+	|Vicedirectora|
+	:Consultar Planilla Contabilidad;
+	:Esperar 1 a 3 días;
+	note left 
+	Planilla Contabilidad
+	2do cuatrimestre 2026
+	end note 
+	:Calcular precio;
+	note left 
+	Resumen Deuda
+	end note 
+	note left 
+	Planilla de precios
+	end note 
+endif
+
+|Secretario|
+:Enviar Resumen Deuda;
+:Esperar respuesta del alumno;
+if ( Alumno realiza un pago en este momento?) then (no)
+	stop
+else (sí)
+endif
+
+if(método de pago?) then (efectivo)
+	:Recibir dinero;
+	:Emitir Comprobante de pago;
+	note right
+	Comprobante de pago
+	end note
+else (transferencia)
+	:Recibir comprobante
+	de transferencia;
+	:Esperar 1 min a 1 día;
+	note right
+	Comprobante de transferencia
+	end note
+endif
+:Anotar pago
+en planilla de día;
+note right
+Planilla de día
+end note
+stop
+@enduml

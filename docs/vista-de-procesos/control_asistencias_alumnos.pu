@@ -1,0 +1,41 @@
+@startuml
+title Control asistencias alumnos
+
+|Secretario|
+:1 vez por semana;
+
+repeat
+:cargar planilla del curso;
+
+note right
+Planilla asistencias del mes
+end note
+note right
+Planilla asistencias del 
+curso en Google Drive
+end note
+note 
+Hay una planilla "maestra" en Drive
+para cada curso.
+end note
+
+repeat while (falta otra planilla) is (sí) not (no)
+
+if (algún alumno tiene >= 4 inasistencias) then (sí)
+	:Avisar a Vicedirectora la
+	situación del alumno;
+else (no)
+	|Vicedirectora|
+	repeat
+	fork
+	:Explicar la situación
+	al alumno;
+	fork again
+	:Explicar la situación
+	al instructor del alumno;
+	end fork
+	repeat while (falta otro alumno) is (sí) not (no)
+	stop
+endif
+stop
+@enduml

@@ -1,0 +1,19 @@
+@startgantt
+title contro deudas alumnos. Pagos al día - ejemplo 1
+Project starts 2026-07-08
+
+[inscripcion] requires 30 days 
+[inscripcion tardia] requires 28 days
+[cuota agosto] requires 30 days
+[cuota septiembre] requires 30 days
+[cuota octubre] requires 31 days
+[cuota noviembre] requires 30 days
+
+[inscripcion] ends 2026-08-08
+[inscripcion tardia] starts 2026-08-09
+[inicio de clases] happens 2026-08-08
+[cuota agosto] starts at [inscripcion]'s end
+[cuota septiembre] starts at [cuota agosto]'s end
+[cuota octubre] starts at [cuota septiembre]'s end
+[cuota noviembre] starts at [cuota octubre]'s end
+@endgantt 

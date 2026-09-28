@@ -1,0 +1,23 @@
+@startuml
+title Alumno averigua sobre inscripción
+start
+:Alumno solicita información
+sobre los cursos;
+if (ya se dictaron 4 clases?) then (sí)
+	:Explicar a Alumno que ya no
+	puede inscribirse e invitarlo
+	a inscribirse en el próximo
+	cuatrimestre;
+	stop
+else (todavía no)
+endif
+
+if (Ya se dictaron 1 a 3 clases?) then (sí)
+	:Explicar a alumno que
+	tendrá 1 a 3 inasistencias
+	y el máximo son 4;
+else (todavía no)
+endif
+:Enviar información sobre cursos;
+stop
+@enduml

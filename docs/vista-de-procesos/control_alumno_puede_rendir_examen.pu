@@ -1,0 +1,29 @@
+@startuml
+title Control alumno puede rendir examen
+|Vicedirectora|
+start
+:Faltan 2 semanas para el
+examen final;
+:buscar alumnos que no
+tienen la cuota al día;
+
+note right
+Lista de alumnos que no
+tienen la cuota al día
+end note
+
+if(lista vacía?) then (sí)
+	stop
+else (no)
+endif
+
+|Secretario|
+repeat
+:avisar a alumno que no podrá rendir examem;
+note left
+Lista de alumnos que no
+tienen la cuota al día
+end note
+repeat while (falta otro alumno en la lista) is (sí) not (no)
+stop
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title Tomar asistencias alumnos
+
+|Instructora|
+:es el día y hora de clase;
+:Pedir la planilla de asistencias; 
+note right
+Planilla de asistencias del mes
+end note
+
+|Secretario|
+:Entregar planilla de asistencias;
+note left
+Planilla de asistencias del mes
+end note
+
+|Instructora|
+:Anotar asistencias;
+note right
+Planilla de asistencias del mes
+end note
+:Dictar clase;
+:Esperar 2 o 3 horas;
+note right
+La duración puede varíar según
+el curso
+end note
+
+|Secretario|
+:Recibir planilla de asistencias;
+note left
+Planilla de asistencias del mes
+end note
+
+@enduml

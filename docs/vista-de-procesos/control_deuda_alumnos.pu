@@ -1,0 +1,58 @@
+@startuml
+title control de deudas de alumnos
+|Vicedirectora|
+start
+:Ya pasaron dos meses
+desde que comenzaron las clases;
+:buscar alumnos que pagaron parcial
+o no pagaron nada;
+
+note right
+Lista de alumnos que pagaron
+parcial o no pagaron nada
+end note
+
+|Secretario|
+if(lista vacía?) then (si)
+	stop
+else (no)
+	repeat
+	:Avisar a alumno que
+	falta pagar la cuota;
+	note left
+	Lista de alumnos que pagaron
+	parcial o no pagaron nada
+	end note
+	repeat while (falta otro alumno en la lista) is (sí) not (no)
+endif
+
+|Vicedirectora|
+while (falta otro mes de clases?) is (si)
+	:Esperar 1 mes;
+	:buscar alumnos que no
+	tienen la cuota al día;
+
+	note right
+	Lista de alumnos que pagaron
+	parcial o no pagaron nada
+	end note
+
+	if(lista vacía?) then (sí)
+		stop
+	else (no)
+	endif
+
+	|Secretario|
+	repeat
+	:Avisar alumno que
+	falta pagar la cuota;
+	note left
+	Lista de alumnos que pagaron
+	parcial o no pagaron nada
+	end note
+	repeat while (falta otro alumno en la lista) is (sí) not (no)
+endwhile (no)
+
+|Vicedirectora|
+stop
+@enduml
