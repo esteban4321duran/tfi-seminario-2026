@@ -1,0 +1,123 @@
+@startuml
+title Modelo de dominio - Americana LSA
+hide empty members
+
+class Alumno
+class InscripcionCurso
+class DesinscripcionCurso
+class PagoAlumno
+class ComprobanteTransferencia
+class AsistenciaAlumno {
+	valor: enum(Presente, Ausente, Justificado)
+}
+note bottom
+se crea una instancia por
+cada alumno inscripto a 
+una PlanificacionCurso cada
+vez que se dicta una clase
+end note
+
+class CuotaInscripcion
+
+
+
+class Curso {
+	nombre
+	descripcion
+	nivel
+}
+class PlanificacionCurso {
+	fechaInicio
+	fechaFin
+	precioCuota
+	precioInscripción
+}
+note bottom
+los cursos vuelven a dictarse
+cada cierto periodo de tiempo
+Por ejemplo, para los cursos
+regulares, se crea una planificación
+cada cuatrimestre
+end note
+
+class HorarioCurso {
+	diaSemana
+	horaInicio
+	duracion
+}
+class ClaseDictada {
+	fechaHora
+}
+
+class AsignacionCurso {
+	rol: (Instructor, Interprete, Teatro)
+}
+class DesasignacionCurso
+class Empleado
+class FirmaAsistencia
+class LibroAsistencias
+
+class Imprenta
+class MaterialEstudio
+class CotizacionImprenta {
+	fechaHoraAprobacion
+}
+class PedidoImprenta
+class DetallePedidoImprenta {
+	cantidad
+}
+class PagoImprenta
+note bottom
+La cotizacion aprobada
+recibirá el o los pagos
+end note
+class RecepcionMaterial {
+	fechaHora
+}
+note bottom
+Puede ser que reciban todo
+junto o una parte del pedido
+end note
+class DetalleRecepcionMaterial
+
+
+
+
+Alumno "1" -- "1..*" InscripcionCurso
+Alumno -- "0..*" DesinscripcionCurso
+InscripcionCurso "0..*" -- "1" PlanificacionCurso
+DesinscripcionCurso "0..*" -- "1" PlanificacionCurso
+InscripcionCurso -- "*" AsistenciaAlumno
+AsistenciaAlumno "*" -- ClaseDictada
+
+Curso -- "0..*" PlanificacionCurso
+PlanificacionCurso -- "1..*" HorarioCurso
+PlanificacionCurso -- "*" ClaseDictada
+PlanificacionCurso -- "0..*" AsignacionCurso
+AsignacionCurso "*" -- Empleado
+PlanificacionCurso -- "0..*" DesasignacionCurso
+DesasignacionCurso "0..*" -- Empleado
+
+LibroAsistencias -- "*" FirmaAsistencia
+FirmaAsistencia "*" -- Empleado
+
+PlanificacionCurso -- "*" MaterialEstudio
+PedidoImprenta -- "*" DetallePedidoImprenta
+DetallePedidoImprenta "*" -- MaterialEstudio
+PedidoImprenta -- "*" CotizacionImprenta
+CotizacionImprenta -- "*" PagoImprenta
+PedidoImprenta -- "*" RecepcionMaterial
+
+PlanificacionCurso -- "*" Cuota
+
+InscripcionCurso -- CuotaInscripcion
+CuotaInscripcion -- Cuota
+CuotaInscripcion -- "*" PagoAlumno
+PagoAlumno "*" -- InscripcionCurso
+ComprobanteTransferencia -- PagoAlumno
+
+
+
+
+
+@enduml
