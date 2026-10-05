@@ -1,0 +1,54 @@
+{{#> layout}}
+<div class="container">
+    <h1>Deuda Alumno</h1>
+    <section class="row">
+        <h4>Datos alumno</h4>
+        <div class="col">
+
+        <ul class="list-group">
+            <li class="list-group-item">Apellido y nombre: Durán Esteban Gabriel</li>
+            <li class="list-group-item">Domicilio: Pasaje maría auxiliadora 2069</li>
+            <li class="list-group-item">Teléfono: 3817654321</li>
+            <li class="list-group-item">Email: esteban.duran@gmail.com</li>
+        </ul>
+
+        </div>
+<div class="col"> 
+<button class="btn btn-primary">buscar otro alumno</button>
+</div>
+    </section>
+    <main class="row">
+        <h2>Cuenta corriente de alumno</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Cuota
+                        <th scope="col">Importe total</th>
+                        <th scope="col">Pagado acumulado</th>
+                        <th scope="col">Pendiente</th>
+                        <th scope="col">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{!-- Iterar una lista de elementos https://handlebarsjs.com/guide/builtin-helpers.html#each --}}
+                    {{#each conceptos}}
+                    <tr class="
+                {{#if this.estadoPagado }}table-success{{/if}}
+                {{#if this.estadoParcial }}table-warning{{/if}}
+                {{#if this.estadoPendiente }}table-danger{{/if}}
+                ">
+                        <th scope="row">{{this.mes}}</th>
+                        <td>{{this.importeTotal}}</td>
+                        <td>{{this.importePagadoAcumulado}}</td>
+                        <td>{{this.importePendiente}}</td>
+                        <td>{{this.estado}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        <h3>Deuda total: {{deudaTotal}}</h3>
+    </main>
+</div>
+{{/layout}}
