@@ -1,3 +1,20 @@
+# Proyecto americana LSA - Seminario 2026
+
+## dependencias
+
+### instalar node.js v24
+
+[node LTS v24](https://nodejs.org/en/download)
+
+### instalar postgres 18
+
+- alternativa 1: usar docker
+
+- alternativa 2: instalar postgres directo en su pc
+
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
