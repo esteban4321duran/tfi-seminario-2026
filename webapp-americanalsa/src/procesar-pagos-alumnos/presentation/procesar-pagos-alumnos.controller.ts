@@ -1,12 +1,13 @@
 import { Controller, Get, Render } from '@nestjs/common';
 import { ProcesarPagosAlumnosService } from '../application/procesar-pagos-alumnos.service.js';
 
+//nest generate controller procesarPagosAlumnos procesarPagosAlumnos
 @Controller('procesar-pagos-alumnos')
 export class ProcesarPagosAlumnosController {
 	constructor(private readonly service: ProcesarPagosAlumnosService) { }
 
 
-	@Get()
+	@Get('informe')
 	@Render('cuenta-corriente-alumno-informe')
 	getInformePage() {
 		const ID_ALUMNO_EJEMPLO = 1;
