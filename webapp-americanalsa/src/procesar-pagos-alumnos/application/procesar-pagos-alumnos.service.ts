@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
-import { alumnoTable } from '../persistence/schema.js';
+import { alumnoTable, cuotaTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
+import { eq, sum } from "drizzle-orm";
 
 //definimos un servicio para este caso de uso
 //$ nest generate service procesarPagosAlumnos/procesarPagosAlumnos 
@@ -17,7 +18,23 @@ export class ProcesarPagosAlumnosService {
 	) {
 	}
 
-	getInformeDeudaAlumno(alumnoId: number): CuentaCorrienteAlumnoInforme {
+	async getInformeDeudaAlumno(alumnoId: number): Promise<CuentaCorrienteAlumnoInforme> {
+
+		const result = await this.db
+			.select({
+				mes: cuotaTable.mes,
+				acumuladoMes: sum(pagoCuotaAlumnoTable.monto),
+			})
+			.from(alumnoTable)
+			.innerJoin(inscripcionAlumnoTable, eq(inscripcionAlumnoTable.alumnoId, alumnoTable.id))
+			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.id))
+			.innerJoin(cuotaTable, eq(cuotaTable.planificacionCursoId, planificacionCursoTable.id))
+			.innerJoin(pagoCuotaAlumnoTable, eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id))
+			.where(eq(alumnoTable.id, alumnoId))
+			.groupBy(cuotaTable.id,cuotaTable.mes);
+
+		console.log(result);
+
 		return {
 			conceptos: [
 				{
