@@ -1,0 +1,847 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "5c388795-1ce0-4534-994e-fd8248ac6486",
+  "prevIds": [
+    "0fee5d10-4ef7-410b-9037-c27c532b0d66"
+  ],
+  "ddl": [
+    {
+      "values": [
+        "a1",
+        "a2",
+        "b1",
+        "b2",
+        "b3"
+      ],
+      "name": "nivel",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "alumno",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "cuota",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "curso",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "inscripcion_alumno",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pago_cuota_alumno",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "planificacion_curso",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "alumno_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "fechaNacimiento",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nombre",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "apellido",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "telefono",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(200)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "domicilio",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "varchar(8)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "dni",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "cuota_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "mes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "planificacionCursoId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "curso_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nombre",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "nivel",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "nivel",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "curso"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "inscripcion_alumno_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "alumnoId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "planificacionCursoId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "pago_cuota_alumno_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "numeric(11,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "monto",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "inscripcionAlumnoId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "cuotaId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "planificacion_curso_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "numeric(11,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "precioCuota",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "fechaInicio",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "fechaFin",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "cursoId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "creadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "actualizadoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "borradoEn",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "planificacionCursoId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "planificacion_curso",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "cuota_planificacionCursoId_planificacion_curso_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "cuota"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "alumnoId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "alumno",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "inscripcion_alumno_alumnoId_alumno_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "planificacionCursoId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "planificacion_curso",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "inscripcion_alumno_HxzR0li5FqS4_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "inscripcion_alumno"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "inscripcionAlumnoId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "inscripcion_alumno",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pago_cuota_alumno_mV0FxLUwGW8v_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "cuotaId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "cuota",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pago_cuota_alumno_cuotaId_cuota_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pago_cuota_alumno"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "cursoId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "curso",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "planificacion_curso_cursoId_curso_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "planificacion_curso"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "alumno_pkey",
+      "schema": "public",
+      "table": "alumno",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "cuota_pkey",
+      "schema": "public",
+      "table": "cuota",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "curso_pkey",
+      "schema": "public",
+      "table": "curso",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "inscripcion_alumno_pkey",
+      "schema": "public",
+      "table": "inscripcion_alumno",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "pago_cuota_alumno_pkey",
+      "schema": "public",
+      "table": "pago_cuota_alumno",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "planificacion_curso_pkey",
+      "schema": "public",
+      "table": "planificacion_curso",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}
