@@ -25,37 +25,6 @@ export class ProcesarPagosAlumnosService {
 
 	async getInformeDeudaAlumno(alumnoId: number): Promise<CuentaCorrienteAlumnoInforme> {
 
-		// //usamos Common table Expressions de SQL para simplificar las expresiones del conjunto resultado
-		// const importesCTE = this.db.$with('importes').as(
-		// 	this.db.select({
-		// 		mes: cuotaTable.mes,
-		// 		importePagadoAcumulado: sum(pagoCuotaAlumnoTable.monto).as('importe_pagado_acumulado'),
-		// 		importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
-		// 		importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - sum("pago_cuota_alumno"."monto")`.as('importe_pendiente') 
-		// 	})
-		// 	.from(cuotaTable)
-		// 	.innerJoin(pagoCuotaAlumnoTable, eq(pagoCuotaAlumnoTable.cuotaId, cuotaTable.id))
-		// 	.innerJoin(inscripcionAlumnoTable, eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id))
-		// 	.innerJoin(alumnoTable, eq(inscripcionAlumnoTable.alumnoId, alumnoTable.id))
-		// 	.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
-		// 	.where(eq(alumnoTable.id, alumnoId))
-		// 	.groupBy(cuotaTable.id,cuotaTable.mes, planificacionCursoTable.id)
-		// );
-		//
-		// const result = await this.db
-		// 	.with(importesCTE)
-		// 	.select({
-		// 		...getColumns(importesCTE),
-		// 			estado: sql`case 
-		// 				when "importe_pagado_acumulado" = "importe_total" then 'pagado'
-		// 				when "importe_pagado_acumulado" > 0 then 'parcial'
-		// 				else 'pendiente'
-		// 				end`,
-		// 			estadoPagado: sql `"importe_pagado_acumulado" = "importe_total" = 0`,
-		// 			estadoParcial: sql `importe_pagado_acumulado" > 0 and importe_pagado_acumulado" < "importe_total`,
-		// 			estadoPendiente: sql `importe_pagado_acumulado" > 0`
-		// 	})
-		// 	.from(importesCTE);
 		const result = await this.db.select({
 			mes: cuotaTable.mes,
 			importePagadoAcumulado: sum(pagoCuotaAlumnoTable.monto).as('importe_pagado_acumulado'),
@@ -71,75 +40,43 @@ export class ProcesarPagosAlumnosService {
 			.groupBy(cuotaTable.id, cuotaTable.mes, planificacionCursoTable.id);
 
 
-		const conceptos2 = result
-		.map((concepto)=>{
-			return {
-				...concepto,
-				mes: dayjs(concepto.mes).format('MMMM'),
-				importeTotal: Number(concepto.importeTotal),
-				importePagadoAcumulado: Number(concepto.importePagadoAcumulado),
-				importePendiente: Number(concepto.importePendiente),
-			};
-		})
-		.map((concepto) => {
-			return {
-				...concepto,
-				estado:  this.estadoConcepto(concepto.importeTotal, concepto.importePagadoAcumulado),
-			};
-		}).map((concepto)=>{
-			return {
-				...concepto,
-				estadoPagado: concepto.estado === 'pagado',
-				estadoParcial: concepto.estado === 'parcial',
-				estadoPendiente: concepto.estado === 'pendiente',
-			};
-		})
+		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+		const formatoDinero = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
-		console.log(conceptos2);
+		const conceptos = result
+			.map((concepto) => {
+				return {
+					mes: dayjs(concepto.mes).format('MMMM'),
+					importeTotal: Number(concepto.importeTotal),
+					importePagadoAcumulado: Number(concepto.importePagadoAcumulado),
+					importePendiente: Number(concepto.importePendiente),
+				};
+			})
+			.map((concepto) => {
+				return {
+					...concepto,
+					estado: this.estadoConcepto(concepto.importeTotal, concepto.importePagadoAcumulado),
+				};
+			}).map((concepto) => {
+				return {
+					...concepto,
+					estadoPagado: concepto.estado === 'pagado',
+					estadoParcial: concepto.estado === 'parcial',
+					estadoPendiente: concepto.estado === 'pendiente',
+				};
+			})
+			.map((concepto) => {
+				return {
+					...concepto,
+					importeTotal: formatoDinero.format(concepto.importeTotal),
+					importePagadoAcumulado: formatoDinero.format(concepto.importePagadoAcumulado),
+					importePendiente: formatoDinero.format(concepto.importePendiente),
+				};
+			});
+
 
 		return {
-			conceptos: [
-				{
-					mes: "marzo",
-					importeTotal: "$60.000,00",
-					importePagadoAcumulado: "$60.000,00",
-					importePendiente: "$0,00",
-					estado: "pagado",
-					estadoPagado: true,
-					estadoPendiente: false,
-					estadoParcial: false,
-				},
-				{
-					mes: "abril",
-					importeTotal: "$60.000,00",
-					importePagadoAcumulado: "$60.000,00",
-					importePendiente: "$0,00",
-					estado: "pagado",
-					estadoPagado: true,
-					estadoPendiente: false,
-					estadoParcial: false,
-				},
-				{
-					mes: "mayo",
-					importeTotal: "$60.000,00",
-					importePagadoAcumulado: "$50.000,00",
-					importePendiente: "$10.000,00",
-					estado: "parcial",
-					estadoPagado: false,
-					estadoPendiente: false,
-					estadoParcial: true,
-				},
-				{
-					mes: "junio",
-					importeTotal: "$60.000,00",
-					importePagadoAcumulado: "$0,00",
-					importePendiente: "$60.000,00",
-					estado: "pendiente",
-					estadoPagado: false,
-					estadoPendiente: true,
-					estadoParcial: false,
-				},
-			],
+			conceptos,
 			deudaTotal: "$70.000",
 		}
 	}
