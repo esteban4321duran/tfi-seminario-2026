@@ -9,9 +9,9 @@ export class ProcesarPagosAlumnosController {
 
 	@Get('informe')
 	@Render('cuenta-corriente-alumno-informe')
-	getInformePage() {
+	async getInformePage() {
 		const ID_ALUMNO_EJEMPLO = 1;
-		const {conceptos, deudaTotal} = this.service.getInformeDeudaAlumno(ID_ALUMNO_EJEMPLO);
+		const {conceptos, deudaTotal} = await this.service.getInformeDeudaAlumno(ID_ALUMNO_EJEMPLO);
 		return { conceptos, deudaTotal};
 	}
 }

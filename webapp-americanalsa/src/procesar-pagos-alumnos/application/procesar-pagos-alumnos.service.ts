@@ -25,7 +25,7 @@ export class ProcesarPagosAlumnosService {
 
 	async getInformeDeudaAlumno(alumnoId: number): Promise<CuentaCorrienteAlumnoInforme> {
 
-		const result = await this.db.select({
+		const importesPorMes = await this.db.select({
 			mes: cuotaTable.mes,
 			importePagadoAcumulado: sum(pagoCuotaAlumnoTable.monto).as('importe_pagado_acumulado'),
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
@@ -39,11 +39,24 @@ export class ProcesarPagosAlumnosService {
 			.where(eq(alumnoTable.id, alumnoId))
 			.groupBy(cuotaTable.id, cuotaTable.mes, planificacionCursoTable.id);
 
+		console.log(importesPorMes);
+
+		const resultTotalAdeudado = await this.db.select({
+			totalAdeudado: sql<string>`sum("planificacion_curso"."precio_cuota") - sum("pago_cuota_alumno"."monto")`.as('total_adeudado')
+		})
+			.from(cuotaTable)
+			.innerJoin(pagoCuotaAlumnoTable, eq(pagoCuotaAlumnoTable.cuotaId, cuotaTable.id))
+			.innerJoin(inscripcionAlumnoTable, eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id))
+			.innerJoin(alumnoTable, eq(inscripcionAlumnoTable.alumnoId, alumnoTable.id))
+			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
+			.where(eq(alumnoTable.id, alumnoId));
+
+
 
 		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 		const formatoDinero = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
-		const conceptos = result
+		const conceptos = importesPorMes
 			.map((concepto) => {
 				return {
 					mes: dayjs(concepto.mes).format('MMMM'),
@@ -74,15 +87,15 @@ export class ProcesarPagosAlumnosService {
 				};
 			});
 
+		const totalAdeudado = formatoDinero.format(Number(resultTotalAdeudado[0].totalAdeudado));
 
 		return {
 			conceptos,
-			deudaTotal: "$70.000",
+			deudaTotal: totalAdeudado
 		}
 	}
 
 	private estadoConcepto(total: number, acumulado: number) {
-
 		if (total === acumulado) {
 			return 'pagado';
 		} else if (acumulado > 0) {
@@ -90,10 +103,5 @@ export class ProcesarPagosAlumnosService {
 		} else {
 			return 'pendiente';
 		}
-
-		// 				when "importe_pagado_acumulado" = "importe_total" then 'pagado'
-		// 				when "importe_pagado_acumulado" > 0 then 'parcial'
-		// 				else 'pendiente'
-		// 				end`,
 	}
 }
