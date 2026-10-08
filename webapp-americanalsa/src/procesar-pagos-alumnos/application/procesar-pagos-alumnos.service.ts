@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
-import { alumnoTable, cuotaTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
-import { eq, getColumns, sql, sum } from "drizzle-orm";
+import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
+import { count, eq, getColumns, sql, sum } from "drizzle-orm";
 import dayjs from "dayjs";
 import 'dayjs/locale/es.js';
 
@@ -11,7 +11,8 @@ dayjs.locale('es');
 
 
 //definimos un servicio para este caso de uso
-//$ nest generate service procesarPagosAlumnos/procesarPagosAlumnos 
+// sintaxis: nest generate service []
+//$ nest generate service application/procesarPagosAlumnos procesarPagosAlumnos
 
 //esta sintaxis le indica al CLI de nest que genere el servicio dentro del modulo procesarPagosAlumnos.
 //.service.ts se concatena automáticamente al nombre del archivo
@@ -59,7 +60,7 @@ export class ProcesarPagosAlumnosService {
 		const conceptos = importesPorMes
 			.map((concepto) => {
 				return {
-					mes: dayjs(concepto.mes).format('MMMM'),
+					mes: dayjs(concepto.mes).format('MMMM YYYY'),
 					importeTotal: Number(concepto.importeTotal),
 					importePagadoAcumulado: Number(concepto.importePagadoAcumulado),
 					importePendiente: Number(concepto.importePendiente),
@@ -93,6 +94,39 @@ export class ProcesarPagosAlumnosService {
 			conceptos,
 			deudaTotal: totalAdeudado
 		}
+	}
+
+	async getAllInformeDeudaAlumno(): Promise<void> {
+		const importesPorMes = await this.db.select({
+			alumno: alumnoTable.id,
+			mes: cuotaTable.mes,
+			curso: cursoTable.nombre,
+			// pagoCuotaAlumno: pagoCuotaAlumnoTable.id,
+			// pagoCuotaAlumnoMonto: pagoCuotaAlumnoTable.monto,
+			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`,
+			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
+			// importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - sum("pago_cuota_alumno"."monto")`.as('importe_pendiente')
+		})
+			.from(cuotaTable)
+			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
+			.innerJoin(cursoTable, eq(planificacionCursoTable.cursoId, cursoTable.id))
+			.innerJoin(inscripcionAlumnoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.planificacionCursoId))
+			.innerJoin(alumnoTable, eq(alumnoTable.id, inscripcionAlumnoTable.alumnoId))
+			.leftJoin(pagoCuotaAlumnoTable, eq(cuotaTable.id, pagoCuotaAlumnoTable.cuotaId))
+			.groupBy(
+				alumnoTable.id,
+				// cuotaTable.id,
+				cursoTable.nombre,
+				cuotaTable.mes,
+				planificacionCursoTable.id,
+				pagoCuotaAlumnoTable.id,
+			)
+			.orderBy(
+				alumnoTable.id,
+				cuotaTable.mes
+			)
+
+		console.table(importesPorMes);
 	}
 
 	private estadoConcepto(total: number, acumulado: number) {
