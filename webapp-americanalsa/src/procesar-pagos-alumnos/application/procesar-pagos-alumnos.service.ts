@@ -99,7 +99,11 @@ export class ProcesarPagosAlumnosService {
 	}
 
 	async getAllInformeDeudaAlumno(): Promise<void> {
+<<<<<<< HEAD
 		const importesPorMesQuery = this.db.select({
+=======
+		const importesPorMes = this.db.select({
+>>>>>>> 60bafd6cf2dcfec25a734f2323f1c0cf1338488a
 			alumno: alumnoTable.id.as('alumno'),
 			mes: sql<number>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
 			anio: sql<number>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
@@ -135,7 +139,11 @@ export class ProcesarPagosAlumnosService {
 				cuotaTable.mes
 			);
 
+<<<<<<< HEAD
 		const matriculasPorMesQuery = this.db.select({
+=======
+		const matriculasPorMes = this.db.select({
+>>>>>>> 60bafd6cf2dcfec25a734f2323f1c0cf1338488a
 			alumno: alumnoTable.id.as('alumno'),
 			mes: sql<number>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
 			anio: sql<number>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
