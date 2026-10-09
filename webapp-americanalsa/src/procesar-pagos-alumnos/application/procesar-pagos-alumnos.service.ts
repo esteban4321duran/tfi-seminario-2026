@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
-import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable, matriculaTable, pagoMatriculacionAlumnoTable} from '../persistence/schema.js';
+import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable, matriculaTable, pagoMatriculacionAlumnoTable } from '../persistence/schema.js';
 import { and, eq, sql, sum } from "drizzle-orm";
 import { union } from 'drizzle-orm/pg-core'
 import dayjs from "dayjs";
@@ -99,11 +99,7 @@ export class ProcesarPagosAlumnosService {
 	}
 
 	async getAllInformeDeudaAlumno(): Promise<void> {
-<<<<<<< HEAD
 		const importesPorMesQuery = this.db.select({
-=======
-		const importesPorMes = this.db.select({
->>>>>>> 60bafd6cf2dcfec25a734f2323f1c0cf1338488a
 			alumno: alumnoTable.id.as('alumno'),
 			mes: sql<number>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
 			anio: sql<number>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
@@ -139,15 +135,11 @@ export class ProcesarPagosAlumnosService {
 				cuotaTable.mes
 			);
 
-<<<<<<< HEAD
 		const matriculasPorMesQuery = this.db.select({
-=======
-		const matriculasPorMes = this.db.select({
->>>>>>> 60bafd6cf2dcfec25a734f2323f1c0cf1338488a
 			alumno: alumnoTable.id.as('alumno'),
 			mes: sql<number>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
 			anio: sql<number>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
-			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto') ,
+			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto'),
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
 			importePagadoAcumulado: sql<number>`coalesce(sum("pago_matriculacion_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
 			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_matriculacion_alumno"."monto"),0)`.as('importe_pendiente'),
