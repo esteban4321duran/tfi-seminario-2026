@@ -3,7 +3,7 @@ import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
 import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
-import { count, eq, getColumns, sql, sum } from "drizzle-orm";
+import { and, eq, sql, sum } from "drizzle-orm";
 import dayjs from "dayjs";
 import 'dayjs/locale/es.js';
 
@@ -101,25 +101,30 @@ export class ProcesarPagosAlumnosService {
 			alumno: alumnoTable.id,
 			mes: cuotaTable.mes,
 			curso: cursoTable.nombre,
-			// pagoCuotaAlumno: pagoCuotaAlumnoTable.id,
-			// pagoCuotaAlumnoMonto: pagoCuotaAlumnoTable.monto,
-			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`,
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
-			// importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - sum("pago_cuota_alumno"."monto")`.as('importe_pendiente')
+			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`,
+			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente')
 		})
 			.from(cuotaTable)
 			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
 			.innerJoin(cursoTable, eq(planificacionCursoTable.cursoId, cursoTable.id))
 			.innerJoin(inscripcionAlumnoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.planificacionCursoId))
 			.innerJoin(alumnoTable, eq(alumnoTable.id, inscripcionAlumnoTable.alumnoId))
-			.leftJoin(pagoCuotaAlumnoTable, eq(cuotaTable.id, pagoCuotaAlumnoTable.cuotaId))
+			.leftJoin(
+				pagoCuotaAlumnoTable,
+				and(
+					eq(pagoCuotaAlumnoTable.cuotaId, cuotaTable.id),
+					eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
+				)
+			)
 			.groupBy(
 				alumnoTable.id,
-				// cuotaTable.id,
-				cursoTable.nombre,
+				inscripcionAlumnoTable.id,
+				cuotaTable.id,
 				cuotaTable.mes,
+				cursoTable.nombre,
 				planificacionCursoTable.id,
-				pagoCuotaAlumnoTable.id,
+				planificacionCursoTable.precioCuota,
 			)
 			.orderBy(
 				alumnoTable.id,
