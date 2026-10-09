@@ -12,26 +12,26 @@ insert into curso (nombre, nivel) values
 ('Nivel B1','b1'),
 ('Nivel B2','b2');
 
-insert into planificacion_curso (precio_cuota, fecha_inicio, fecha_fin, curso_id) values
- (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 1),
- (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 2),
- (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 3),
- (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 4),
+insert into planificacion_curso (precio_cuota, fecha_inicio, fecha_fin, curso_id, precio_matricula) values
+ (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 1, 20000.00),
+ (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 2, 20000.00),
+ (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 3, 20000.00),
+ (20000.00,'2025-03-01 09:00:00 America/Argentina/Buenos_Aires', '2025-06-28 12:00:00 America/Argentina/Buenos_Aires', 4, 20000.00),
 
- (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 1),
- (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 2),
- (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 3),
- (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 4),
+ (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 1, 20000.00),
+ (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 2, 20000.00),
+ (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 3, 20000.00),
+ (20000.00,'2025-08-09 09:00:00 America/Argentina/Buenos_Aires', '2025-11-29 12:00:00 America/Argentina/Buenos_Aires', 4, 20000.00),
 
- (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2025-06-27 12:00:00 America/Argentina/Buenos_Aires', 1),
- (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2025-06-27 12:00:00 America/Argentina/Buenos_Aires', 2),
- (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2025-06-27 12:00:00 America/Argentina/Buenos_Aires', 3),
- (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2025-06-27 12:00:00 America/Argentina/Buenos_Aires', 4),
+ (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2026-06-27 12:00:00 America/Argentina/Buenos_Aires', 1,25000.00),
+ (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2026-06-27 12:00:00 America/Argentina/Buenos_Aires', 2,25000.00),
+ (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2026-06-27 12:00:00 America/Argentina/Buenos_Aires', 3,25000.00),
+ (25000.00,'2026-03-07 09:00:00 America/Argentina/Buenos_Aires', '2026-06-27 12:00:00 America/Argentina/Buenos_Aires', 4,25000.00),
 
- (25000.00,'2025-08-08 09:00:00 America/Argentina/Buenos_Aires', '2025-11-28 12:00:00 America/Argentina/Buenos_Aires', 1),
- (25000.00,'2025-08-08 09:00:00 America/Argentina/Buenos_Aires', '2025-11-28 12:00:00 America/Argentina/Buenos_Aires', 2),
- (25000.00,'2025-08-08 09:00:00 America/Argentina/Buenos_Aires', '2025-11-28 12:00:00 America/Argentina/Buenos_Aires', 3),
- (25000.00,'2025-08-08 09:00:00 America/Argentina/Buenos_Aires', '2025-11-28 12:00:00 America/Argentina/Buenos_Aires', 4);
+ (25000.00,'2026-08-08 09:00:00 America/Argentina/Buenos_Aires', '2026-11-28 12:00:00 America/Argentina/Buenos_Aires', 1,25000.00),
+ (25000.00,'2026-08-08 09:00:00 America/Argentina/Buenos_Aires', '2026-11-28 12:00:00 America/Argentina/Buenos_Aires', 2,25000.00),
+ (25000.00,'2026-08-08 09:00:00 America/Argentina/Buenos_Aires', '2026-11-28 12:00:00 America/Argentina/Buenos_Aires', 3,25000.00),
+ (25000.00,'2026-08-08 09:00:00 America/Argentina/Buenos_Aires', '2026-11-28 12:00:00 America/Argentina/Buenos_Aires', 4,25000.00);
 
 insert into inscripcion_alumno (alumno_id, planificacion_curso_id) values 
  -- alumno id 1
@@ -54,7 +54,7 @@ insert into inscripcion_alumno (alumno_id, planificacion_curso_id) values
 
  -- alumno id 5
 (5, 1),
-(5, 10),
+(5, 14),
 
  -- alumno id 6
 (6, 2),
@@ -145,13 +145,23 @@ insert into cuota (mes, planificacion_curso_id) values
 ('2026-11-01', 15),
 ('2026-11-01', 16);
 
--- export const pagoCuotaAlumnoTable = pgTable('pago_cuota_alumno', {
--- 	id: integer().generatedAlwaysAsIdentity().primaryKey(),
--- 	monto: decimal({ mode: "number", precision: DIGITOS_PRECISION_NUMEROS_REALES, scale: DIGITOS_DECIMALES_NUMEROS_REALES }).notNull(),
--- 	inscripcionAlumnoId: integer().notNull().references(()=>inscripcionAlumnoTable.id),
--- 	cuotaId: integer().notNull().references(()=>cuotaTable.id),
--- 	...timestampsSchema
--- })
+insert into matricula (planificacion_curso_id) values 
+(1),
+(2),
+(3),
+(4),
+(5),
+(6),
+(7),
+(8),
+(9),
+(10),
+(11),
+(12),
+(13),
+(14),
+(15),
+(16);
 
 insert into pago_cuota_alumno (monto, inscripcion_alumno_id, cuota_id) values 
 -- pagos de cuotas de las diferentes inscripciones del alumno id 1
@@ -231,7 +241,7 @@ insert into pago_cuota_alumno (monto, inscripcion_alumno_id, cuota_id) values
 (25000.00, 12, 34),
 (25000.00, 12, 38),
 (25000.00, 12, 42),
-(10000.00, 12, 46),
+(10000.00, 12, 45),
 
 -- pagos de cuotas de las diferentes inscripciones del alumno id 6
 -- a2 primer cuatrimestre 2025
@@ -243,3 +253,31 @@ insert into pago_cuota_alumno (monto, inscripcion_alumno_id, cuota_id) values
 -- b1 segundo cuatrimestre 2026
 (25000.00, 14, 51),
 (25000.00, 14, 55);
+
+insert into pago_matriculacion_alumno (monto, inscripcion_alumno_id, matricula_id) values
+ -- alumno id 1
+(20000.00, 1, 1),
+(20000.00, 2, 6),
+(25000.00, 3, 11),
+(25000.00, 4, 16),
+
+ -- alumno id 2
+(20000.00, 5, 4),
+(20000.00, 6, 8),
+
+ -- alumno id 3
+(20000.00, 7, 7),
+(25000.00, 8, 12),
+
+ -- alumno id 4
+(20000.00, 9, 2),
+(20000.00, 10, 7),
+
+ -- alumno id 5
+(20000.00, 11, 1),
+(25000.00, 12, 14),
+
+ -- alumno id 6
+(20000.00, 13, 2),
+(25000.00, 14, 15);
+
