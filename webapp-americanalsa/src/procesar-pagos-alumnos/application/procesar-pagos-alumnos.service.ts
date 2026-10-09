@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
-import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
+import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable, matriculaTable, pagoMatriculacionAlumnoTable} from '../persistence/schema.js';
 import { and, eq, sql, sum } from "drizzle-orm";
+import { union } from 'drizzle-orm/pg-core'
 import dayjs from "dayjs";
 import 'dayjs/locale/es.js';
+
 
 dayjs.locale('es');
 
@@ -97,13 +99,15 @@ export class ProcesarPagosAlumnosService {
 	}
 
 	async getAllInformeDeudaAlumno(): Promise<void> {
-		const importesPorMes = await this.db.select({
-			alumno: alumnoTable.id,
-			mes: cuotaTable.mes,
-			curso: cursoTable.nombre,
+		const importesPorMes = this.db.select({
+			alumno: alumnoTable.id.as('alumno'),
+			mes: sql<number>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
+			anio: sql<number>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
+			concepto: cursoTable.nombre,
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
-			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`,
-			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente')
+			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
+			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente'),
+			ordenRelativo: sql<number>`2`.as('orden_relativo'),
 		})
 			.from(cuotaTable)
 			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
@@ -129,9 +133,78 @@ export class ProcesarPagosAlumnosService {
 			.orderBy(
 				alumnoTable.id,
 				cuotaTable.mes
-			)
+			);
 
-		console.table(importesPorMes);
+		const matriculasPorMes = this.db.select({
+			alumno: alumnoTable.id.as('alumno'),
+			mes: sql<number>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
+			anio: sql<number>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
+			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto') ,
+			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
+			importePagadoAcumulado: sql<number>`coalesce(sum("pago_matriculacion_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
+			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_matriculacion_alumno"."monto"),0)`.as('importe_pendiente'),
+			ordenRelativo: sql<number>`1`.as('orden_relativo'),
+		})
+			.from(matriculaTable)
+			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, matriculaTable.planificacionCursoId))
+			.innerJoin(cursoTable, eq(planificacionCursoTable.cursoId, cursoTable.id))
+			.innerJoin(inscripcionAlumnoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.planificacionCursoId))
+			.innerJoin(alumnoTable, eq(alumnoTable.id, inscripcionAlumnoTable.alumnoId))
+			.leftJoin(
+				pagoMatriculacionAlumnoTable,
+				and(
+					eq(pagoMatriculacionAlumnoTable.matriculaId, matriculaTable.id),
+					eq(pagoMatriculacionAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
+				)
+			)
+			.groupBy(
+				alumnoTable.id,
+				inscripcionAlumnoTable.id,
+				matriculaTable.id,
+				planificacionCursoTable.fechaInicio,
+				cursoTable.nombre,
+				planificacionCursoTable.id,
+				planificacionCursoTable.precioCuota,
+			)
+			.orderBy(
+				alumnoTable.id,
+				planificacionCursoTable.fechaInicio,
+			);
+
+		const conceptos = await union(
+			importesPorMes,
+			matriculasPorMes
+		).orderBy(sql`
+			"alumno",
+			"anio",
+			"mes",
+			"orden_relativo"
+			`)
+
+		console.table(conceptos);
+
+		// const conceptosPorAlumno = Map.groupBy(importesPorMes, (concepto) => concepto.alumno);
+		// const conceptosPorAlumnoPorMes = new Map();
+		// for (const [alumno, conceptos] of conceptosPorAlumno.entries()){
+		// 	conceptosPorAlumnoPorMes.set(alumno,  Map.groupBy(conceptos, (c)=>c.mes));
+		// }
+		//
+		// /*
+		//  * agregar tablas inscripcion y pagoInscripcionAlumno. Esta nueva tabla inscripcion, representa la entidad que el profe nos pidió que almacenemos por separado de las cuotas.
+		//  * la inscripcion tiene el mismo valor de mes que la primera cuota.
+		//  * Para incluir el pago de la inscripción en el informe podría hacer otra consulta similar a esta, pero from(inscripcion)
+		//  * incluir un sub indice 1 entre las columnas resultantes de la consulta de pagos de inscripion
+		//  * incluir un sub indice 2 entre las columnas resultantes de la consulta de pagos de cuotas
+		//  * luego hacer UNION de ambos result set y ordenar por alumno.id (opcional), mes, sub indice. De esta manera la inscripcion figura antes que las cuotas.
+		//  */
+		//
+		// console.log(conceptosPorAlumnoPorMes);
+		// /*
+		//  * return {
+		//  * 	meses: [ARRAY CONSTANTE DE MESES] para armar la plantilla. Aprovechar el helper #unless para los meses en que los alumnos no tengan una cuota.
+		//  *	
+		//  * }
+		//  */
 	}
 
 	private estadoConcepto(total: number, acumulado: number) {
