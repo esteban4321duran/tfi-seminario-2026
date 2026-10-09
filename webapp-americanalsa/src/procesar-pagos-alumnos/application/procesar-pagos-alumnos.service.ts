@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { CuentaCorrienteAlumnoInforme } from './CuentaCorrienteAlumnoInforme.js';
+import { CuentaCorrienteAlumnoInforme, CuentaCorrienteAlumnoInformeV2 } from './CuentaCorrienteAlumnoInforme.js';
 import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable, matriculaTable, pagoMatriculacionAlumnoTable } from '../persistence/schema.js';
 import { and, eq, sql, sum } from "drizzle-orm";
 import { union } from 'drizzle-orm/pg-core'
@@ -11,6 +11,36 @@ import 'dayjs/locale/es.js';
 
 dayjs.locale('es');
 
+interface CeldaCuentaCorrienteAlumno {
+	alumno: number;
+	mes: string;
+	anio: string;
+	concepto: string;
+	importeTotal: number;
+	importePagadoAcumulado: number;
+	importePendiente: number;
+	ordenRelativo: number;
+}
+
+enum TipoConcepto {
+	MATRICULA = 1,
+	CUOTA = 2,
+}
+
+const MESES_MAP = new Map([
+	['1', 'enero'],
+	['2', 'febrero'],
+	['3', 'marzo'],
+	['4', 'abril'],
+	['5', 'mayo'],
+	['6', 'junio'],
+	['7', 'julio'],
+	['8', 'agosto'],
+	['9', 'septiembre'],
+	['10', 'octubre'],
+	['11', 'noviembre'],
+	['12', 'diciembre'],
+]);
 
 //definimos un servicio para este caso de uso
 // sintaxis: nest generate service []
@@ -71,7 +101,7 @@ export class ProcesarPagosAlumnosService {
 			.map((concepto) => {
 				return {
 					...concepto,
-					estado: this.estadoConcepto(concepto.importeTotal, concepto.importePagadoAcumulado),
+					estado: this.getEstadoCelda(concepto.importeTotal, concepto.importePagadoAcumulado),
 				};
 			}).map((concepto) => {
 				return {
@@ -98,15 +128,15 @@ export class ProcesarPagosAlumnosService {
 		}
 	}
 
-	async getAllInformeDeudaAlumno(): Promise<void> {
+	async getAllInformeDeudaAlumno(): Promise<CuentaCorrienteAlumnoInformeV2> {
 		const importesPorMesQuery = this.db.select({
 			alumno: alumnoTable.id.as('alumno'),
-			mes: sql<number>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
-			anio: sql<number>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
+			mes: sql<string>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
+			anio: sql<string>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
 			concepto: cursoTable.nombre,
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
 			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
-			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente'),
+			importePendiente: sql<number>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente'),
 			ordenRelativo: sql<number>`2`.as('orden_relativo'),
 		})
 			.from(cuotaTable)
@@ -137,12 +167,12 @@ export class ProcesarPagosAlumnosService {
 
 		const matriculasPorMesQuery = this.db.select({
 			alumno: alumnoTable.id.as('alumno'),
-			mes: sql<number>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
-			anio: sql<number>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
+			mes: sql<string>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
+			anio: sql<string>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
 			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto'),
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
 			importePagadoAcumulado: sql<number>`coalesce(sum("pago_matriculacion_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
-			importePendiente: sql<string>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_matriculacion_alumno"."monto"),0)`.as('importe_pendiente'),
+			importePendiente: sql<number>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_matriculacion_alumno"."monto"),0)`.as('importe_pendiente'),
 			ordenRelativo: sql<number>`1`.as('orden_relativo'),
 		})
 			.from(matriculaTable)
@@ -171,43 +201,56 @@ export class ProcesarPagosAlumnosService {
 				planificacionCursoTable.fechaInicio,
 			);
 
-		const conceptos = await union(
-			importesPorMesQuery,
-			matriculasPorMesQuery
-		).orderBy(sql`
-			"alumno",
+		const celdas: CeldaCuentaCorrienteAlumno[]
+			= await union(
+				importesPorMesQuery,
+				matriculasPorMesQuery
+			).orderBy(sql`
+			-- "alumno",
 			"anio",
 			"mes",
 			"orden_relativo"
-			`)
+			`);
 
-		console.table(conceptos);
+		const celdasPorAlumno = Map.groupBy(celdas, (c) => c.alumno);
+		const celdasPorAlumnoPorConcepto = new Map();
+		for (const [alumno, conceptos] of celdasPorAlumno.entries()) {
+			celdasPorAlumnoPorConcepto.set(
+				alumno,
+				Map.groupBy(
+					conceptos,
+					this.getConceptoDeuda
+				)
+			);
+		}
+		const columnasKeys = new Set(
+			celdas.map(
+				this.getConceptoDeuda
 
-		// const conceptosPorAlumno = Map.groupBy(importesPorMes, (concepto) => concepto.alumno);
-		// const conceptosPorAlumnoPorMes = new Map();
-		// for (const [alumno, conceptos] of conceptosPorAlumno.entries()){
-		// 	conceptosPorAlumnoPorMes.set(alumno,  Map.groupBy(conceptos, (c)=>c.mes));
-		// }
-		//
-		// /*
-		//  * agregar tablas inscripcion y pagoInscripcionAlumno. Esta nueva tabla inscripcion, representa la entidad que el profe nos pidió que almacenemos por separado de las cuotas.
-		//  * la inscripcion tiene el mismo valor de mes que la primera cuota.
-		//  * Para incluir el pago de la inscripción en el informe podría hacer otra consulta similar a esta, pero from(inscripcion)
-		//  * incluir un sub indice 1 entre las columnas resultantes de la consulta de pagos de inscripion
-		//  * incluir un sub indice 2 entre las columnas resultantes de la consulta de pagos de cuotas
-		//  * luego hacer UNION de ambos result set y ordenar por alumno.id (opcional), mes, sub indice. De esta manera la inscripcion figura antes que las cuotas.
-		//  */
-		//
-		// console.log(conceptosPorAlumnoPorMes);
-		// /*
-		//  * return {
-		//  * 	meses: [ARRAY CONSTANTE DE MESES] para armar la plantilla. Aprovechar el helper #unless para los meses en que los alumnos no tengan una cuota.
-		//  *	
-		//  * }
-		//  */
+			)
+		);
+		const filasKeys = new Set(
+			celdas.map(
+				(c) => c.alumno
+			)
+		);
+
+		celdas.map((c) => {
+			return {
+				...c,
+				fecha: `${MESES_MAP.get(c.mes)} ${c.anio}`,
+				estado: this.getEstadoCelda(c.importeTotal, c.importePagadoAcumulado)
+			}
+		});
+
+		return {
+			celdasPorAlumnoPorConcepto,
+			columnasKeys,
+			filasKeys,
+		}
 	}
 
-	private estadoConcepto(total: number, acumulado: number) {
+	private getEstadoCelda(total: number, acumulado: number) {
 		if (total === acumulado) {
 			return 'pagado';
 		} else if (acumulado > 0) {
@@ -215,5 +258,9 @@ export class ProcesarPagosAlumnosService {
 		} else {
 			return 'pendiente';
 		}
+	}
+
+	private getConceptoDeuda(item: CeldaCuentaCorrienteAlumno): string {
+		return `${MESES_MAP.get(item.mes)}-${item.ordenRelativo === TipoConcepto.MATRICULA ? 'matricula' : 'cuota'}`
 	}
 }

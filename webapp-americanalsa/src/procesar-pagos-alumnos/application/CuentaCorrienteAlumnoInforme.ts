@@ -14,7 +14,7 @@ export interface CuentaCorrienteAlumnoInforme {
 	deudaTotal: string;
 }
 
-export interface ConceptoCuentaCorrienteAlumnoV2 {
+export interface CeldaCuentaCorrienteAlumno {
 	mes: string;
 	importeTotal: string;
 	importePagadoAcumulado: string;
@@ -26,6 +26,9 @@ export interface ConceptoCuentaCorrienteAlumnoV2 {
 }
 
 export interface CuentaCorrienteAlumnoInformeV2 {
+	celdasPorAlumnoPorConcepto: Map<number, Map<string, CeldaCuentaCorrienteAlumno>>
+	columnasKeys: Set<string>;
+	filasKeys: Set<number>;
 }
 
 
