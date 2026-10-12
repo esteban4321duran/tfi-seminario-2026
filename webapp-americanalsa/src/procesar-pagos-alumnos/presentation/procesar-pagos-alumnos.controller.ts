@@ -16,10 +16,10 @@ export class ProcesarPagosAlumnosController {
 	}
 
 	@Get('informe-todos')
-	@Render('cuenta-corriente-alumno-informe')
+	@Render('cuenta-corriente-multialumno-informe')
 	async getAllInformePage() {
-		await this.service.getAllInformeDeudaAlumno();
-		return { conceptos: [], deudaTotal: "20.000"};
+		const { conceptos, cuentasAlumnos } = await this.service.getAllInformeDeudaAlumno();
+		return { conceptos, cuentasAlumnos };
 	}
 }
 
