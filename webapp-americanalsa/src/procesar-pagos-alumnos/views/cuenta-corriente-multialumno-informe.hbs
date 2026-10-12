@@ -1,0 +1,58 @@
+{{#> layout}}
+<link href="https://cdn.datatables.net/3.1.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<div class="container-fluid">
+        <div class="table-responsive">
+                <table id="example" class="table table-striped">
+                        <thead>
+                                <tr>
+                                        <th>id alumno</th>
+                                        {{#each conceptos}}
+                                        <th>{{this}}</th>
+                                        {{/each}}
+                                </tr>
+                        </thead>
+                        <tbody>
+                                {{#each cuentasAlumnos}}
+                                {{#with this as |cuentaCorrienteAlumno|}}
+                                <tr>
+                                        <td>{{cuentaCorrienteAlumno.alumno.dni}}</td>
+                                        {{#each cuentaCorrienteAlumno.conceptos}}
+                                        {{#with this as |concepto|}}
+                                        {{#unless concepto.vacio}}
+                                        {{#if concepto.estadoPagado}}
+                                        <td class="table-secondary">
+                                                Pagado
+                                        </td>
+                                        {{/if}}
+                                        {{#if concepto.estadoParcial}}
+                                        <td class="table-warning">
+                                                Parcial. Falta: {{concepto.importePendiente}}
+                                        </td>
+                                        {{/if}}
+                                        {{#if concepto.estadoPendiente}}
+                                        <td class="table-danger">
+                                                Pendiente. Falta: {{concepto.importePendiente}}
+                                        </td>
+                                        {{/if}}
+                                        {{/unless}}
+                                        {{#if concepto.vacio}}
+                                        <td>
+                                                -----
+                                        </td>
+                                        {{/if}}
+                                        {{/with}}
+                                        {{/each}}
+                                </tr>
+                                {{/with}}
+                                {{/each}}
+                        </tbody>
+                </table>
+        </div>
+
+</div>
+<script src="https://cdn.datatables.net/3.1.3/js/dataTables.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/3.1.3/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+<script defer>
+        new DataTable('#example');
+</script>
+{{/layout}}
