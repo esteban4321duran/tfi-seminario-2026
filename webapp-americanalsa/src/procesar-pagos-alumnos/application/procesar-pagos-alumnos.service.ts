@@ -11,7 +11,7 @@ import 'dayjs/locale/es.js';
 
 dayjs.locale('es');
 
-interface CeldaCuentaCorrienteAlumno {
+export interface RegistroCuentaCorrienteAlumno {
 	alumno: number;
 	mes: string;
 	anio: string;
@@ -195,12 +195,18 @@ export class ProcesarPagosAlumnosService {
 				planificacionCursoTable.id,
 				planificacionCursoTable.precioCuota,
 			)
+			.having(
+				eq(
+					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
+					2026
+				)
+			)
 			.orderBy(
 				alumnoTable.id,
 				planificacionCursoTable.fechaInicio,
 			);
 
-		const celdas: CeldaCuentaCorrienteAlumno[]
+		const registros: RegistroCuentaCorrienteAlumno[]
 			= await union(
 				importesPorMesQuery,
 				matriculasPorMesQuery
