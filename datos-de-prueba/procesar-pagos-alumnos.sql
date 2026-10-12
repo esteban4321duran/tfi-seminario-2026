@@ -54,7 +54,7 @@ insert into inscripcion_alumno (alumno_id, planificacion_curso_id) values
 
  -- alumno id 5
 (5, 1),
-(5, 14),
+(5, 10),
 
  -- alumno id 6
 (6, 2),

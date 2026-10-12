@@ -54,7 +54,7 @@ insert into inscripcion_alumno (alumno_id, planificacion_curso_id) values
 
  -- alumno id 5
 (5, 1),
-(5, 14),
+(5, 10),
 
  -- alumno id 6
 (6, 2),
@@ -280,5 +280,6 @@ insert into pago_matriculacion_alumno (monto, inscripcion_alumno_id, matricula_i
  -- alumno id 6
 (20000.00, 13, 2),
 (25000.00, 14, 15);
+
 
 
