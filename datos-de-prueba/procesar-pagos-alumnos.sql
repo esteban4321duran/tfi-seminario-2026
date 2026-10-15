@@ -275,7 +275,7 @@ insert into pago_matriculacion_alumno (monto, inscripcion_alumno_id, matricula_i
 
  -- alumno id 5
 (20000.00, 11, 1),
-(25000.00, 12, 14),
+(25000.00, 12, 10),
 
  -- alumno id 6
 (20000.00, 13, 2),
