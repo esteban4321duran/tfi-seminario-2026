@@ -7,12 +7,17 @@ import { and, eq, sql, sum } from "drizzle-orm";
 import { union } from 'drizzle-orm/pg-core'
 import dayjs from "dayjs";
 import 'dayjs/locale/es.js';
+import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
+import { FormatoFechaService } from '../../core/application/formato-fecha-service/formato-fecha-service.js';
 
 
 dayjs.locale('es');
 
 export interface RegistroCuentaCorrienteAlumno {
-	alumno: number;
+	alumnoId: number;
+	dni: string;
+	apellido: string;
+	nombre: string;
 	mes: string;
 	anio: string;
 	concepto: string;
@@ -100,7 +105,7 @@ export class ProcesarPagosAlumnosService {
 			.map((concepto) => {
 				return {
 					...concepto,
-					estado: this.getEstadoCelda(concepto.importeTotal, concepto.importePagadoAcumulado),
+					estado: this.getEstadoConcepto(concepto.importeTotal, concepto.importePagadoAcumulado),
 				};
 			}).map((concepto) => {
 				return {
@@ -129,10 +134,13 @@ export class ProcesarPagosAlumnosService {
 
 	async getAllInformeDeudaAlumno(): Promise<CuentaCorrienteAlumnoInformeV2> {
 		const importesPorMesQuery = this.db.select({
-			alumno: alumnoTable.id.as('alumno'),
+			alumnoId: alumnoTable.id.as('alumno'),
+			dni: alumnoTable.dni,
+			apellido: alumnoTable.apellido,
+			nombre: sql<string>`"alumno"."nombre"`.as('nombre'),
 			mes: sql<string>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
 			anio: sql<string>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
-			concepto: cursoTable.nombre,
+			concepto: sql<string>`"curso"."nombre"`.as('concepto'),
 			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
 			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
 			importePendiente: sql<number>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente'),
@@ -152,6 +160,9 @@ export class ProcesarPagosAlumnosService {
 			)
 			.groupBy(
 				alumnoTable.id,
+				alumnoTable.dni,
+				alumnoTable.apellido,
+				alumnoTable.nombre,
 				inscripcionAlumnoTable.id,
 				cuotaTable.id,
 				cuotaTable.mes,
@@ -159,13 +170,22 @@ export class ProcesarPagosAlumnosService {
 				planificacionCursoTable.id,
 				planificacionCursoTable.precioCuota,
 			)
+			.having(
+				eq(
+					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
+					2025
+				)
+			)
 			.orderBy(
 				alumnoTable.id,
 				cuotaTable.mes
 			);
 
 		const matriculasPorMesQuery = this.db.select({
-			alumno: alumnoTable.id.as('alumno'),
+			alumnoId: alumnoTable.id.as('alumno'),
+			dni: alumnoTable.dni,
+			apellido: alumnoTable.apellido,
+			nombre: sql<string>`"alumno"."nombre"`.as('nombre'),
 			mes: sql<string>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
 			anio: sql<string>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
 			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto'),
@@ -188,6 +208,10 @@ export class ProcesarPagosAlumnosService {
 			)
 			.groupBy(
 				alumnoTable.id,
+				alumnoTable.dni,
+				alumnoTable.apellido,
+				alumnoTable.nombre,
+				inscripcionAlumnoTable.id,
 				inscripcionAlumnoTable.id,
 				matriculaTable.id,
 				planificacionCursoTable.fechaInicio,
@@ -229,12 +253,17 @@ export class ProcesarPagosAlumnosService {
 			.map((r) => {
 				return {
 					...r,
-					alumno: '' + r.alumno,
-					importeTotal: '' + r.importeTotal,
-					importePagadoAcumulado: '' + r.importePagadoAcumulado,
-					importePendiente: '' + r.importePendiente,
+					alumno: {
+						id: String(r.alumnoId),
+						dni: r.dni,
+						apellido: r.apellido,
+						nombre: r.nombre
+					},
+					importeTotal: formatoMoneda.format(r.importeTotal),
+					importePagadoAcumulado: formatoMoneda.format(r.importePagadoAcumulado),
+					importePendiente: formatoMoneda.format(r.importePendiente),
 					vacio: false,
-					estado: this.getEstadoCelda(r.importeTotal, r.importePagadoAcumulado),
+					estado: this.getEstadoConcepto(r.importeTotal, r.importePagadoAcumulado),
 				}
 			}).map((r) => {
 				return {
@@ -246,56 +275,62 @@ export class ProcesarPagosAlumnosService {
 				}
 			});
 
-		const celdasPorAlumno = Map.groupBy(conceptos, (c) => c.alumno);
+		const celdasPorAlumno = Map.groupBy(conceptos, (c) => c.alumno.id);
 		const celdasPorAlumnoPorConcepto = new Map<string, Map<string, ConceptoCuentaCorrienteAlumnoV2[]>>();
 		for (const [alumno, cs] of celdasPorAlumno.entries()) {
 			celdasPorAlumnoPorConcepto.set(
 				alumno,
 				Map.groupBy(
 					cs,
-					this.getConceptoDeuda
+					this.getConceptoDeuda.bind(this)
 				)
 			);
 		}
 		const columnasKeys = Array.from(
 			new Set(
 				conceptos.map(
-					this.getConceptoDeuda
+					this.getConceptoDeuda.bind(this)
 				)
 			)
 		);
 
 		const filasKeys = Array.from(
 			new Set(
-				conceptos.map(
-					(c) => c.alumno
-				)
+				conceptos.map((c) => c.alumno.id)
 			)
 		);
 
-
 		const celdasMatriz = new Array<(ConceptoCuentaCorrienteAlumnoV2 | ConceptoVacio)[]>();
 
-		filasKeys.forEach((alumno, i) => {
+		filasKeys.forEach((alumnoId, i) => {
 			columnasKeys.forEach((concepto, j) => {
 				if (celdasMatriz[i] === undefined) {
 					celdasMatriz[i] = new Array();
 				}
 
-				if (!celdasPorAlumnoPorConcepto.get(alumno)?.has(concepto)) {
+				if (!celdasPorAlumnoPorConcepto.get(alumnoId)?.has(concepto)) {
 					celdasMatriz[i][j] = { vacio: true }
 				} else {
-					celdasMatriz[i][j] = celdasPorAlumnoPorConcepto.get(alumno)!.get(concepto)![0];
+					celdasMatriz[i][j] = celdasPorAlumnoPorConcepto.get(alumnoId)!.get(concepto)![0];
 				}
 
 
 			});
 		});
+
+		const alumnosPorId =
+			Map
+				.groupBy(
+					conceptos.map((c) => c.alumno),
+					(alumno) => alumno.id
+				)
+
+
 		const informe: CuentaCorrienteAlumnoInformeV2 = {
 			conceptos: columnasKeys,
-			cuentasAlumnos: filasKeys.map((alumno, i) => {
+			cuentasAlumnos: filasKeys.map((alumnoId, i) => {
 				return {
-					alumno: { dni: alumno },
+					alumno: alumnosPorId.get(alumnoId)![0],
 					conceptos: celdasMatriz[i],
 					deudaTotal: '$0.00'
 				}
@@ -304,7 +339,7 @@ export class ProcesarPagosAlumnosService {
 		return informe;
 	}
 
-	private getEstadoCelda(total: number, acumulado: number) {
+	private getEstadoConcepto(total: number, acumulado: number) {
 		if (total === acumulado) {
 			return 'pagado';
 		} else if (acumulado > 0) {

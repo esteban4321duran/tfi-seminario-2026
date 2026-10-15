@@ -14,15 +14,22 @@ export interface CuentaCorrienteAlumnoInforme {
 	deudaTotal: string;
 }
 
+export interface Alumno {
+	id: string;
+	dni: string;
+	apellido: string;
+	nombre: string;
+}
+
 export interface CuentaCorrienteAlumno {
-	alumno: { dni: string }
+	alumno: Alumno
 	conceptos: (ConceptoCuentaCorrienteAlumnoV2 | ConceptoVacio)[];
 	deudaTotal: string;
 }
 
 export interface ConceptoCuentaCorrienteAlumnoV2 {
 	vacio: boolean;
-	alumno: string;
+	alumno: Alumno;
 	concepto: string;
 	importeTotal: string;
 	importePagadoAcumulado: string;

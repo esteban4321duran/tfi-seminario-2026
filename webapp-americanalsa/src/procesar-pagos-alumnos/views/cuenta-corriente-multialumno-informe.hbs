@@ -5,7 +5,8 @@
                 <table id="example" class="table table-striped">
                         <thead>
                                 <tr>
-                                        <th>id alumno</th>
+                                        <th>Apellido, Nombre</th>
+                                        <th>DNI</th>
                                         {{#each conceptos}}
                                         <th>{{this}}</th>
                                         {{/each}}
@@ -15,7 +16,10 @@
                                 {{#each cuentasAlumnos}}
                                 {{#with this as |cuentaCorrienteAlumno|}}
                                 <tr>
+                                        <td>{{cuentaCorrienteAlumno.alumno.apellido}},
+                                                {{cuentaCorrienteAlumno.alumno.nombre}}</td>
                                         <td>{{cuentaCorrienteAlumno.alumno.dni}}</td>
+
                                         {{#each cuentaCorrienteAlumno.conceptos}}
                                         {{#with this as |concepto|}}
                                         {{#unless concepto.vacio}}
