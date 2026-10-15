@@ -12,7 +12,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "cross-env DATABASE_HOST=postgres://postgres:tfi-seminario-2026@127.0.0.1:5432/americanalsa_dev nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start:debug": "cross-env DATABASE_HOST=postgres://postgres:tfi-seminario-2026@127.0.0.1:5432/americanalsa_dev nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "oxlint --type-aware src/ test/",
     "test": "vitest run",
@@ -20,8 +20,9 @@
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "drizzle-generate:dev": "npx drizzle-kit generate --config=drizzle-dev.config.ts",
-    "drizzle-push:dev": "npx drizzle-kit push --config=drizzle-dev.config.ts"
+    "generate:dev": "npx drizzle-kit generate --config=drizzle-dev.config.ts",
+    "push:dev": "npx drizzle-kit push --config=drizzle-dev.config.ts",
+    "migrate:dev": "npx drizzle-kit migrate --config=drizzle-dev.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
