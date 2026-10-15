@@ -33,21 +33,6 @@ enum TipoConcepto {
 	CUOTA = 2,
 }
 
-const MESES_MAP = new Map([
-	['1', 'enero'],
-	['2', 'febrero'],
-	['3', 'marzo'],
-	['4', 'abril'],
-	['5', 'mayo'],
-	['6', 'junio'],
-	['7', 'julio'],
-	['8', 'agosto'],
-	['9', 'septiembre'],
-	['10', 'octubre'],
-	['11', 'noviembre'],
-	['12', 'diciembre'],
-]);
-
 //definimos un servicio para este caso de uso
 // sintaxis: nest generate service []
 //$ nest generate service application/procesarPagosAlumnos procesarPagosAlumnos
@@ -59,6 +44,8 @@ export class ProcesarPagosAlumnosService {
 	constructor(
 		@InjectDrizzle()
 		private readonly db: NodePgDatabase,
+		private readonly formatoMonedaService: FormatoMonedaService,
+		private readonly formatoFechaService: FormatoFechaService,
 	) {
 	}
 
@@ -88,10 +75,7 @@ export class ProcesarPagosAlumnosService {
 			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
 			.where(eq(alumnoTable.id, alumnoId));
 
-
-
-		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
-		const formatoDinero = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+		const formatoDinero = this.formatoMonedaService.getFormateador();
 
 		const conceptos = importesPorMes
 			.map((concepto) => {
@@ -241,6 +225,7 @@ export class ProcesarPagosAlumnosService {
 			"orden_relativo"
 			`);
 
+		const formatoMoneda = this.formatoMonedaService.getFormateador();
 
 		const conceptos: ConceptoCuentaCorrienteAlumnoV2[] = registros
 			.map((r) => {
@@ -349,7 +334,11 @@ export class ProcesarPagosAlumnosService {
 		}
 	}
 
-	private getConceptoDeuda(item: ConceptoCuentaCorrienteAlumnoV2): string {
-		return `${MESES_MAP.get(item.mes)}-${item.anio}-${item.ordenRelativo === TipoConcepto.MATRICULA ? 'matricula' : 'cuota'}`
+	private tipoConceptoEnLetras(concepto: ConceptoCuentaCorrienteAlumnoV2): string {
+		return concepto.ordenRelativo === TipoConcepto.MATRICULA ? 'Matricula' : 'Cuota';
+	}
+
+	private getConceptoDeuda(concepto: ConceptoCuentaCorrienteAlumnoV2): string {
+		return `${this.tipoConceptoEnLetras(concepto)} ${this.formatoFechaService.mesEnLetras(concepto.mes)} ${concepto.anio}`
 	}
 }

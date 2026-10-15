@@ -4,6 +4,7 @@ import { AppService } from './app.service.js';
 import { ProcesarPagosAlumnosModule } from './procesar-pagos-alumnos/procesar-pagos-alumnos.module.js';
 import { DrizzleModule } from '@nestjs/drizzle';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { CoreModule } from './core/core.module.js';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
       drizzle,
       connection: process.env.DATABASE_HOST!,
     }),
+    CoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],
