@@ -1,4 +1,4 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, ParseIntPipe, Query, Render } from '@nestjs/common';
 import { ProcesarPagosAlumnosService } from '../application/procesar-pagos-alumnos.service.js';
 
 //nest generate controller procesarPagosAlumnos procesarPagosAlumnos
@@ -17,8 +17,11 @@ export class ProcesarPagosAlumnosController {
 
 	@Get('informe-todos')
 	@Render('cuenta-corriente-multialumno-informe')
-	async getAllInformePage() {
-		const { conceptos, cuentasAlumnos } = await this.service.getAllInformeDeudaAlumno();
+	async getAllInformePage(
+		@Query('anio', ParseIntPipe) anio: number,
+	) {
+
+		const { conceptos, cuentasAlumnos } = await this.service.getAllInformeDeudaAlumno(anio);
 		return { conceptos, cuentasAlumnos };
 	}
 }

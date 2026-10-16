@@ -116,7 +116,7 @@ export class ProcesarPagosAlumnosService {
 		}
 	}
 
-	async getAllInformeDeudaAlumno(): Promise<CuentaCorrienteAlumnoInformeV2> {
+	async getAllInformeDeudaAlumno(anio: number = dayjs().year()): Promise<CuentaCorrienteAlumnoInformeV2> {
 		const importesPorMesQuery = this.db.select({
 			alumnoId: alumnoTable.id.as('alumno'),
 			dni: alumnoTable.dni,
@@ -157,7 +157,7 @@ export class ProcesarPagosAlumnosService {
 			.having(
 				eq(
 					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
-					2025
+					anio,
 				)
 			)
 			.orderBy(
@@ -206,7 +206,7 @@ export class ProcesarPagosAlumnosService {
 			.having(
 				eq(
 					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
-					2026
+					anio
 				)
 			)
 			.orderBy(
@@ -309,7 +309,6 @@ export class ProcesarPagosAlumnosService {
 					conceptos.map((c) => c.alumno),
 					(alumno) => alumno.id
 				)
-
 
 		const informe: CuentaCorrienteAlumnoInformeV2 = {
 			conceptos: columnasKeys,
