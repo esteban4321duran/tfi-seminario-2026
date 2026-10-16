@@ -225,52 +225,8 @@ export class ProcesarPagosAlumnosService {
 			"orden_relativo"
 			`);
 
-		const formatoMoneda = this.formatoMonedaService.getFormateador();
-
-		const conceptos: ConceptoCuentaCorrienteAlumnoV2[] = registros
-			.map((r) => {
-				return {
-					...r,
-					importePagadoAcumulado: Number(r.importePagadoAcumulado),
-					importePendiente: Number(r.importePendiente),
-				}
-			})
-			.map((r) => {
-				return {
-					...r,
-					alumno: {
-						id: String(r.alumnoId),
-						dni: r.dni,
-						apellido: r.apellido,
-						nombre: r.nombre
-					},
-					importeTotal: formatoMoneda.format(r.importeTotal),
-					importePagadoAcumulado: formatoMoneda.format(r.importePagadoAcumulado),
-					importePendiente: formatoMoneda.format(r.importePendiente),
-					vacio: false,
-					estado: this.getEstadoConcepto(r.importeTotal, r.importePagadoAcumulado),
-				}
-			}).map((r) => {
-				return {
-					...r,
-					// TODO refactorizaar estados en un enum de strings
-					estadoPagado: r.estado === 'pagado',
-					estadoParcial: r.estado === 'parcial',
-					estadoPendiente: r.estado === 'pendiente',
-				}
-			});
-
-		const celdasPorAlumno = Map.groupBy(conceptos, (c) => c.alumno.id);
-		const celdasPorAlumnoPorConcepto = new Map<string, Map<string, ConceptoCuentaCorrienteAlumnoV2[]>>();
-		for (const [alumno, cs] of celdasPorAlumno.entries()) {
-			celdasPorAlumnoPorConcepto.set(
-				alumno,
-				Map.groupBy(
-					cs,
-					this.getConceptoDeuda.bind(this)
-				)
-			);
-		}
+		const conceptos = this.mapearAConceptoCuentaCorriente(registros);
+		const celdasPorAlumnoPorConcepto = this.agruparPorAlumnoPorConcepto(conceptos);
 		const columnasKeys = Array.from(
 			new Set(
 				conceptos.map(
@@ -338,6 +294,58 @@ export class ProcesarPagosAlumnosService {
 	}
 
 	private getConceptoDeuda(concepto: ConceptoCuentaCorrienteAlumnoV2): string {
-		return `${this.tipoConceptoEnLetras(concepto)} ${this.formatoFechaService.mesEnLetras(concepto.mes)} ${concepto.anio}`
+		return `${this.tipoConceptoEnLetras(concepto)} ${this.formatoFechaService.mesEnLetras(concepto.mes)}`
+	}
+
+	private mapearAConceptoCuentaCorriente(registros: RegistroCuentaCorrienteAlumno[]): ConceptoCuentaCorrienteAlumnoV2[] {
+		const formatoMoneda = this.formatoMonedaService.getFormateador();
+
+		return registros
+			.map((r) => {
+				return {
+					...r,
+					importePagadoAcumulado: Number(r.importePagadoAcumulado),
+					importePendiente: Number(r.importePendiente),
+				}
+			})
+			.map((r) => {
+				return {
+					...r,
+					alumno: {
+						id: String(r.alumnoId),
+						dni: r.dni,
+						apellido: r.apellido,
+						nombre: r.nombre
+					},
+					importeTotal: formatoMoneda.format(r.importeTotal),
+					importePagadoAcumulado: formatoMoneda.format(r.importePagadoAcumulado),
+					importePendiente: formatoMoneda.format(r.importePendiente),
+					vacio: false,
+					estado: this.getEstadoConcepto(r.importeTotal, r.importePagadoAcumulado),
+				}
+			}).map((r) => {
+				return {
+					...r,
+					// TODO refactorizaar estados en un enum de strings
+					estadoPagado: r.estado === 'pagado',
+					estadoParcial: r.estado === 'parcial',
+					estadoPendiente: r.estado === 'pendiente',
+				}
+			});
+	}
+
+	private agruparPorAlumnoPorConcepto(conceptos: ConceptoCuentaCorrienteAlumnoV2[]): Map<string, Map<string, ConceptoCuentaCorrienteAlumnoV2[]>> {
+		const celdasPorAlumno = Map.groupBy(conceptos, (c) => c.alumno.id);
+		const celdasPorAlumnoPorConcepto = new Map<string, Map<string, ConceptoCuentaCorrienteAlumnoV2[]>>();
+		for (const [alumno, cs] of celdasPorAlumno.entries()) {
+			celdasPorAlumnoPorConcepto.set(
+				alumno,
+				Map.groupBy(
+					cs,
+					this.getConceptoDeuda.bind(this)
+				)
+			);
+		}
+		return celdasPorAlumnoPorConcepto;
 	}
 }
