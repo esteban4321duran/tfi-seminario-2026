@@ -29,7 +29,7 @@ export class CuentaCorrienteAlumnoReader {
 
 	}
 
-	public async getRegistros(anio: number): Promise<RegistroCuentaCorrienteAlumno[]>{
+	public async getRegistrosTodos(anio: number): Promise<RegistroCuentaCorrienteAlumno[]>{
 		const importesPorMesQuery = this.db.select({
 			alumnoId: alumnoTable.id.as('alumno'),
 			dni: alumnoTable.dni,

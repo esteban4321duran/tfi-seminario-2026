@@ -2,31 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { ConceptoCuentaCorrienteAlumnoV2, ConceptoVacio, CuentaCorrienteAlumnoInforme, CuentaCorrienteAlumnoInformeV2 } from './CuentaCorrienteAlumnoInforme.js';
-import { alumnoTable, cuotaTable, cursoTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable, matriculaTable, pagoMatriculacionAlumnoTable } from '../persistence/schema.js';
-import { and, eq, sql, sum } from "drizzle-orm";
-import { union } from 'drizzle-orm/pg-core'
+import { alumnoTable, cuotaTable, inscripcionAlumnoTable, pagoCuotaAlumnoTable, planificacionCursoTable } from '../persistence/schema.js';
+import { eq, sql, sum } from "drizzle-orm";
 import dayjs from "dayjs";
 import 'dayjs/locale/es.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { FormatoFechaService } from '../../core/application/formato-fecha-service/formato-fecha-service.js';
+import { CuentaCorrienteAlumnoReader, RegistroCuentaCorrienteAlumno } from '../persistence/cuenta-corriente-alumno-reader/cuenta-corriente-alumno-reader.js';
 
 
 dayjs.locale('es');
-
-export interface RegistroCuentaCorrienteAlumno {
-	alumnoId: number;
-	dni: string;
-	apellido: string;
-	nombre: string;
-	mes: string;
-	anio: string;
-	concepto: string;
-	importeTotal: number;
-	importePagadoAcumulado: number;
-	importePendiente: number;
-	ordenRelativo: number;
-}
-
 
 enum TipoConcepto {
 	MATRICULA = 1,
@@ -44,6 +29,7 @@ export class ProcesarPagosAlumnosService {
 	constructor(
 		@InjectDrizzle()
 		private readonly db: NodePgDatabase,
+		private readonly sqlService: CuentaCorrienteAlumnoReader,
 		private readonly formatoMonedaService: FormatoMonedaService,
 		private readonly formatoFechaService: FormatoFechaService,
 	) {
@@ -117,165 +103,10 @@ export class ProcesarPagosAlumnosService {
 	}
 
 	async getAllInformeDeudaAlumno(anio: number = dayjs().year()): Promise<CuentaCorrienteAlumnoInformeV2> {
-		const importesPorMesQuery = this.db.select({
-			alumnoId: alumnoTable.id.as('alumno'),
-			dni: alumnoTable.dni,
-			apellido: alumnoTable.apellido,
-			nombre: sql<string>`"alumno"."nombre"`.as('nombre'),
-			mes: sql<string>`EXTRACT(MONTH from "cuota".mes)`.as("mes"),
-			anio: sql<string>`EXTRACT(YEAR from "cuota".mes)`.as("anio"),
-			concepto: sql<string>`"curso"."nombre"`.as('concepto'),
-			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
-			importePagadoAcumulado: sql<number>`coalesce(sum("pago_cuota_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
-			importePendiente: sql<number>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_cuota_alumno"."monto"),0)`.as('importe_pendiente'),
-			ordenRelativo: sql<number>`2`.as('orden_relativo'),
-		})
-			.from(cuotaTable)
-			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, cuotaTable.planificacionCursoId))
-			.innerJoin(cursoTable, eq(planificacionCursoTable.cursoId, cursoTable.id))
-			.innerJoin(inscripcionAlumnoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.planificacionCursoId))
-			.innerJoin(alumnoTable, eq(alumnoTable.id, inscripcionAlumnoTable.alumnoId))
-			.leftJoin(
-				pagoCuotaAlumnoTable,
-				and(
-					eq(pagoCuotaAlumnoTable.cuotaId, cuotaTable.id),
-					eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
-				)
-			)
-			.groupBy(
-				alumnoTable.id,
-				alumnoTable.dni,
-				alumnoTable.apellido,
-				alumnoTable.nombre,
-				inscripcionAlumnoTable.id,
-				cuotaTable.id,
-				cuotaTable.mes,
-				cursoTable.nombre,
-				planificacionCursoTable.id,
-				planificacionCursoTable.precioCuota,
-			)
-			.having(
-				eq(
-					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
-					anio,
-				)
-			)
-			.orderBy(
-				alumnoTable.id,
-				cuotaTable.mes
-			);
 
-		const matriculasPorMesQuery = this.db.select({
-			alumnoId: alumnoTable.id.as('alumno'),
-			dni: alumnoTable.dni,
-			apellido: alumnoTable.apellido,
-			nombre: sql<string>`"alumno"."nombre"`.as('nombre'),
-			mes: sql<string>`EXTRACT(MONTH from "planificacion_curso"."fecha_inicio")`.as("mes"),
-			anio: sql<string>`EXTRACT(YEAR from "planificacion_curso"."fecha_inicio")`.as("anio"),
-			concepto: sql<string>`concat('matricula ', "curso"."nombre")`.as('concepto'),
-			importeTotal: planificacionCursoTable.precioCuota.as('importe_total'),
-			importePagadoAcumulado: sql<number>`coalesce(sum("pago_matriculacion_alumno"."monto"), 0)`.as('importe_pagado_acumulado'),
-			importePendiente: sql<number>`"planificacion_curso"."precio_cuota" - coalesce(sum("pago_matriculacion_alumno"."monto"),0)`.as('importe_pendiente'),
-			ordenRelativo: sql<number>`1`.as('orden_relativo'),
-		})
-			.from(matriculaTable)
-			.innerJoin(planificacionCursoTable, eq(planificacionCursoTable.id, matriculaTable.planificacionCursoId))
-			.innerJoin(cursoTable, eq(planificacionCursoTable.cursoId, cursoTable.id))
-			.innerJoin(inscripcionAlumnoTable, eq(planificacionCursoTable.id, inscripcionAlumnoTable.planificacionCursoId))
-			.innerJoin(alumnoTable, eq(alumnoTable.id, inscripcionAlumnoTable.alumnoId))
-			.leftJoin(
-				pagoMatriculacionAlumnoTable,
-				and(
-					eq(pagoMatriculacionAlumnoTable.matriculaId, matriculaTable.id),
-					eq(pagoMatriculacionAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
-				)
-			)
-			.groupBy(
-				alumnoTable.id,
-				alumnoTable.dni,
-				alumnoTable.apellido,
-				alumnoTable.nombre,
-				inscripcionAlumnoTable.id,
-				inscripcionAlumnoTable.id,
-				matriculaTable.id,
-				planificacionCursoTable.fechaInicio,
-				cursoTable.nombre,
-				planificacionCursoTable.id,
-				planificacionCursoTable.precioCuota,
-			)
-			.having(
-				eq(
-					sql<number>`EXTRACT(year from "planificacion_curso"."fecha_inicio")`,
-					anio
-				)
-			)
-			.orderBy(
-				alumnoTable.id,
-				planificacionCursoTable.fechaInicio,
-			);
-
-		const registros: RegistroCuentaCorrienteAlumno[]
-			= await union(
-				importesPorMesQuery,
-				matriculasPorMesQuery
-			).orderBy(sql`
-			-- "alumno",
-			"anio",
-			"mes",
-			"orden_relativo"
-			`);
-
+		const registros = await this.sqlService.getRegistrosTodos(anio);
 		const conceptos = this.mapearAConceptoCuentaCorriente(registros);
-		const celdasPorAlumnoPorConcepto = this.agruparPorAlumnoPorConcepto(conceptos);
-		const columnasKeys = Array.from(
-			new Set(
-				conceptos.map(
-					this.getConceptoDeuda.bind(this)
-				)
-			)
-		);
-
-		const filasKeys = Array.from(
-			new Set(
-				conceptos.map((c) => c.alumno.id)
-			)
-		);
-
-		const celdasMatriz = new Array<(ConceptoCuentaCorrienteAlumnoV2 | ConceptoVacio)[]>();
-
-		filasKeys.forEach((alumnoId, i) => {
-			columnasKeys.forEach((concepto, j) => {
-				if (celdasMatriz[i] === undefined) {
-					celdasMatriz[i] = new Array();
-				}
-
-				if (!celdasPorAlumnoPorConcepto.get(alumnoId)?.has(concepto)) {
-					celdasMatriz[i][j] = { vacio: true }
-				} else {
-					celdasMatriz[i][j] = celdasPorAlumnoPorConcepto.get(alumnoId)!.get(concepto)![0];
-				}
-
-
-			});
-		});
-
-		const alumnosPorId =
-			Map
-				.groupBy(
-					conceptos.map((c) => c.alumno),
-					(alumno) => alumno.id
-				)
-
-		const informe: CuentaCorrienteAlumnoInformeV2 = {
-			conceptos: columnasKeys,
-			cuentasAlumnos: filasKeys.map((alumnoId, i) => {
-				return {
-					alumno: alumnosPorId.get(alumnoId)![0],
-					conceptos: celdasMatriz[i],
-					deudaTotal: '$0.00'
-				}
-			}),
-		};
+		const informe = this.construirInformeMultialumno(conceptos);
 		return informe;
 	}
 
@@ -347,5 +178,57 @@ export class ProcesarPagosAlumnosService {
 			);
 		}
 		return celdasPorAlumnoPorConcepto;
+	}
+
+	private construirInformeMultialumno(conceptos: ConceptoCuentaCorrienteAlumnoV2[]): CuentaCorrienteAlumnoInformeV2 {
+
+		const celdasPorAlumnoPorConcepto = this.agruparPorAlumnoPorConcepto(conceptos);
+		const columnasKeys = Array.from(
+			new Set(
+				conceptos.map(
+					this.getConceptoDeuda.bind(this)
+				)
+			)
+		);
+
+		const filasKeys = Array.from(
+			new Set(
+				conceptos.map((c) => c.alumno.id)
+			)
+		);
+
+		const celdasMatriz = new Array<(ConceptoCuentaCorrienteAlumnoV2 | ConceptoVacio)[]>();
+
+		filasKeys.forEach((alumnoId, i) => {
+			columnasKeys.forEach((concepto, j) => {
+				if (celdasMatriz[i] === undefined) {
+					celdasMatriz[i] = new Array();
+				}
+
+				if (!celdasPorAlumnoPorConcepto.get(alumnoId)?.has(concepto)) {
+					celdasMatriz[i][j] = { vacio: true }
+				} else {
+					celdasMatriz[i][j] = celdasPorAlumnoPorConcepto.get(alumnoId)!.get(concepto)![0];
+				}
+			});
+		});
+
+		const alumnosPorId =
+			Map
+				.groupBy(
+					conceptos.map((c) => c.alumno),
+					(alumno) => alumno.id
+				)
+
+		return {
+			conceptos: columnasKeys,
+			cuentasAlumnos: filasKeys.map((alumnoId, i) => {
+				return {
+					alumno: alumnosPorId.get(alumnoId)![0],
+					conceptos: celdasMatriz[i],
+					deudaTotal: '$0.00'
+				}
+			}),
+		};
 	}
 }
