@@ -1,5 +1,6 @@
 import { Controller, Get, ParseIntPipe, Query, Render } from '@nestjs/common';
 import { ProcesarPagosAlumnosService } from '../application/procesar-pagos-alumnos.service.js';
+import dayjs from 'dayjs';
 
 //nest generate controller procesarPagosAlumnos procesarPagosAlumnos
 @Controller('procesar-pagos-alumnos')
@@ -21,8 +22,22 @@ export class ProcesarPagosAlumnosController {
 		@Query('anio', ParseIntPipe) anio: number,
 	) {
 
-		const { conceptos, cuentasAlumnos } = await this.service.getAllInformeDeudaAlumno(anio);
-		return { conceptos, cuentasAlumnos };
+		const { conceptos, cuentasAlumnos } = await this.service.getInformeDeudaTodos(anio);
+
+		const ANIO_INICIAL = 2025;
+		const ANIOS_DESDE_INICIAL = dayjs().diff(dayjs().year(ANIO_INICIAL), 'years') + 1; 
+		const anios = Array.from(Array(ANIOS_DESDE_INICIAL).keys()).map(x => ANIO_INICIAL + x);
+
+		return {
+			conceptos,
+			cuentasAlumnos,
+			aniosOptions: anios.map(a=> {
+				return {
+					valor: a,
+					esSeleccionado: a === anio
+				}
+			}),
+		};
 	}
 }
 
