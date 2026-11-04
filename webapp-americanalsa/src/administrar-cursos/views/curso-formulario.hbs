@@ -1,0 +1,89 @@
+{{#> layout}}
+<main class="container py-4">
+	<h1 class="h3 mb-3">Crear curso</h1>
+
+	{{#if mensajeError}}
+	<div class="alert alert-danger">{{mensajeError}}</div>
+	{{/if}}
+
+	{{#if faltantes.length}}
+	<div class="alert alert-danger">
+		Faltan completar los siguientes campos:
+		<ul class="mb-0">
+			{{#each faltantes}}<li>{{this}}</li>{{/each}}
+		</ul>
+	</div>
+	{{/if}}
+
+	<form method="post" action="/administrar-cursos" class="row g-3">
+		<div class="col-md-6">
+			<label for="nombre" class="form-label">Nombre del curso</label>
+			<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}">
+		</div>
+
+		<div class="col-md-3">
+			<label for="anio" class="form-label">Año</label>
+			<input type="number" class="form-control" id="anio" name="anio" value="{{valores.anio}}">
+		</div>
+
+		<div class="col-md-3">
+			<label for="cuatrimestre" class="form-label">Cuatrimestre</label>
+			<select class="form-select" id="cuatrimestre" name="cuatrimestre">
+				{{#each cuatrimestres}}
+				<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
+				{{/each}}
+			</select>
+		</div>
+
+		<div class="col-md-6">
+			<label for="instructoraId" class="form-label">Instructora</label>
+			<select class="form-select" id="instructoraId" name="instructoraId">
+				<option value="">Seleccione...</option>
+				{{#each instructoras}}
+				<option value="{{this.id}}" {{#if this.seleccionada}}selected{{/if}}>{{this.apellido}}, {{this.nombre}}</option>
+				{{/each}}
+			</select>
+		</div>
+
+		<div class="col-md-6">
+			<label for="cantidadClases" class="form-label">Cantidad de clases</label>
+			<input type="number" min="1" class="form-control" id="cantidadClases" name="cantidadClases" value="{{valores.cantidadClases}}">
+		</div>
+
+		<div class="col-12">
+			<label class="form-label d-block">Días de clase</label>
+			{{#each dias}}
+			<div class="form-check form-check-inline">
+				<input class="form-check-input" type="checkbox" id="dia-{{this.valor}}" name="dias" value="{{this.valor}}" {{#if this.marcado}}checked{{/if}}>
+				<label class="form-check-label" for="dia-{{this.valor}}">{{this.etiqueta}}</label>
+			</div>
+			{{/each}}
+		</div>
+
+		<div class="col-md-3">
+			<label for="horaInicio" class="form-label">Hora de inicio</label>
+			<input type="time" class="form-control" id="horaInicio" name="horaInicio" value="{{valores.horaInicio}}">
+		</div>
+
+		<div class="col-md-3">
+			<label for="duracionMinutos" class="form-label">Duración (minutos)</label>
+			<input type="number" min="1" class="form-control" id="duracionMinutos" name="duracionMinutos" value="{{valores.duracionMinutos}}">
+		</div>
+
+		<div class="col-md-3">
+			<label for="precioCuota" class="form-label">Precio cuota (opcional)</label>
+			<input type="number" min="0" step="0.01" class="form-control" id="precioCuota" name="precioCuota" value="{{valores.precioCuota}}">
+		</div>
+
+		<div class="col-md-3">
+			<label for="precioMatricula" class="form-label">Precio matrícula (opcional)</label>
+			<input type="number" min="0" step="0.01" class="form-control" id="precioMatricula" name="precioMatricula" value="{{valores.precioMatricula}}">
+		</div>
+
+		<div class="col-12">
+			<button type="submit" class="btn btn-primary">Guardar curso</button>
+			<a href="/administrar-cursos" class="btn btn-secondary">Cancelar</a>
+		</div>
+	</form>
+</main>
+{{/layout}}

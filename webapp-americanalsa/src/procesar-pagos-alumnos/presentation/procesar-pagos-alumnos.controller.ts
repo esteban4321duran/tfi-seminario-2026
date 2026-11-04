@@ -20,9 +20,10 @@ export class ProcesarPagosAlumnosController {
 	@Render('cuenta-corriente-multialumno-informe')
 	async getAllInformePage(
 		@Query('anio', ParseIntPipe) anio: number,
+		@Query('alumnoId', new ParseIntPipe({ optional: true })) alumnoId?: number,
 	) {
 
-		const { conceptos, cuentasAlumnos } = await this.service.getInformeDeudaTodos(anio);
+		const { conceptos, cuentasAlumnos } = await this.service.getInformeDeudaTodos(anio, alumnoId);
 
 		const ANIO_INICIAL = 2025;
 		const ANIOS_DESDE_INICIAL = dayjs().diff(dayjs().year(ANIO_INICIAL), 'years') + 1; 

@@ -1,0 +1,43 @@
+{{#> layout}}
+<main class="container py-4">
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h1 class="h3 mb-0">Cursos</h1>
+		<a class="btn btn-primary" href="/administrar-cursos/nuevo">Crear curso</a>
+	</div>
+
+	{{#if creado}}
+	<div class="alert alert-success">El curso se guardó correctamente con su instructora asignada.</div>
+	{{/if}}
+
+	{{#if cursos.length}}
+	<div class="table-responsive">
+		<table class="table table-striped align-middle">
+			<thead>
+				<tr>
+					<th>Curso</th>
+					<th>Cuatrimestre</th>
+					<th>Instructora</th>
+					<th>Días y horario</th>
+					<th>Clases</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each cursos}}
+				<tr {{#if this.esNuevo}}class="table-success"{{/if}}>
+					<td>{{this.nombre}}</td>
+					<td>{{this.cuatrimestre}}</td>
+					<td>{{#if this.instructora}}{{this.instructora}}{{else}}—{{/if}}</td>
+					<td>
+						{{#each this.horarios}}<div>{{this}}</div>{{else}}—{{/each}}
+					</td>
+					<td>{{this.cantidadClases}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	{{else}}
+	<div class="alert alert-info">Todavía no hay cursos cargados.</div>
+	{{/if}}
+</main>
+{{/layout}}

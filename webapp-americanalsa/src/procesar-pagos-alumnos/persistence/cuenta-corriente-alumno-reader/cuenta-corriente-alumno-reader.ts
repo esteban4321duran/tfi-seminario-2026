@@ -29,7 +29,7 @@ export class CuentaCorrienteAlumnoReader {
 
 	}
 
-	public async getRegistrosTodos(anio: number): Promise<RegistroCuentaCorrienteAlumno[]>{
+	public async getRegistrosTodos(anio: number, alumnoId?: number): Promise<RegistroCuentaCorrienteAlumno[]>{
 		const importesPorMesQuery = this.db.select({
 			alumnoId: alumnoTable.id.as('alumno'),
 			dni: alumnoTable.dni,
@@ -55,6 +55,7 @@ export class CuentaCorrienteAlumnoReader {
 					eq(pagoCuotaAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
 				)
 			)
+			.where(alumnoId === undefined ? undefined : eq(alumnoTable.id, alumnoId))
 			.groupBy(
 				alumnoTable.id,
 				alumnoTable.dni,
@@ -103,6 +104,7 @@ export class CuentaCorrienteAlumnoReader {
 					eq(pagoMatriculacionAlumnoTable.inscripcionAlumnoId, inscripcionAlumnoTable.id,),
 				)
 			)
+			.where(alumnoId === undefined ? undefined : eq(alumnoTable.id, alumnoId))
 			.groupBy(
 				alumnoTable.id,
 				alumnoTable.dni,

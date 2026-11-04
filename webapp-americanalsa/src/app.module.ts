@@ -5,11 +5,14 @@ import { ProcesarPagosAlumnosModule } from './procesar-pagos-alumnos/procesar-pa
 import { DrizzleModule } from '@nestjs/drizzle';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { CoreModule } from './core/core.module.js';
-
+import { AdministrarCursosModule } from './administrar-cursos/administrar-cursos.module.js';
+import { InscribirAlumnoModule } from './inscribir-alumno/inscribir-alumno.module.js';
 
 @Module({
   imports: [
     ProcesarPagosAlumnosModule,
+    AdministrarCursosModule,
+    InscribirAlumnoModule, 
     DrizzleModule.forRoot({
       drizzle,
       connection: process.env.DATABASE_HOST!,

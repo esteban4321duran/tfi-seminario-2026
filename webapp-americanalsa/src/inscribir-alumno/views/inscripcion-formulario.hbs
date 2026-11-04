@@ -1,0 +1,77 @@
+{{#> layout}}
+<main class="container py-4">
+	<h1 class="h3 mb-3">Inscribir alumno a un curso</h1>
+
+	{{#if mensajeError}}
+	<div class="alert alert-danger">
+		{{mensajeError}}
+		{{#if cuotasAdeudadas.length}}
+		<ul class="mb-0 mt-2">
+			{{#each cuotasAdeudadas}}<li>{{this.curso}} - {{this.mes}}: falta {{this.pendiente}}</li>{{/each}}
+		</ul>
+		{{/if}}
+	</div>
+	{{/if}}
+
+	{{#if faltantes.length}}
+	<div class="alert alert-danger">
+		Faltan completar los siguientes campos:
+		<ul class="mb-0">
+			{{#each faltantes}}<li>{{this}}</li>{{/each}}
+		</ul>
+	</div>
+	{{/if}}
+
+	<section class="mb-4">
+		<h2 class="h5">¿El alumno ya está registrado?</h2>
+		<form method="get" action="/inscribir-alumno" class="row g-2">
+			<div class="col-md-6">
+				<input type="text" class="form-control" name="buscar" placeholder="Buscar por apellido o nombre" value="{{buscar}}">
+			</div>
+			<div class="col-auto"><button type="submit" class="btn btn-secondary">Buscar</button></div>
+		</form>
+		{{#if hayBusqueda}}
+			{{#if encontrados.length}}
+			<ul class="list-group mt-2">
+				{{#each encontrados}}
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					{{this.apellido}}, {{this.nombre}}
+					<a class="btn btn-sm btn-outline-primary" href="/inscribir-alumno?alumnoId={{this.id}}">Elegir</a>
+				</li>
+				{{/each}}
+			</ul>
+			{{else}}
+			<div class="alert alert-info mt-2">No se encontraron alumnos. Complete los datos abajo para cargarlo como alumno nuevo.</div>
+			{{/if}}
+		{{/if}}
+	</section>
+
+	<form method="post" action="/inscribir-alumno" class="row g-3">
+		<input type="hidden" name="alumnoId" value="{{valores.alumnoId}}">
+
+		<div class="col-md-6">
+			<label for="apellido" class="form-label">Apellido</label>
+			<input type="text" class="form-control" id="apellido" name="apellido" value="{{valores.apellido}}" {{#if alumnoElegido}}readonly{{/if}}>
+		</div>
+		<div class="col-md-6">
+			<label for="nombre" class="form-label">Nombre</label>
+			<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" {{#if alumnoElegido}}readonly{{/if}}>
+		</div>
+
+		<div class="col-12">
+			<label for="planificacionCursoId" class="form-label">Curso</label>
+			<select class="form-select" id="planificacionCursoId" name="planificacionCursoId">
+				<option value="">Seleccione...</option>
+				{{#each cursos}}
+				<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
+				{{/each}}
+			</select>
+		</div>
+
+		<div class="col-12">
+			<button type="submit" class="btn btn-primary">Inscribir</button>
+			<a href="/inscribir-alumno" class="btn btn-secondary">Limpiar</a>
+		</div>
+	</form>
+</main>
+{{/layout}}

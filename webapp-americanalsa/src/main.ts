@@ -5,6 +5,8 @@ import { join } from 'path';
 import hbs from 'hbs'
 
 const procesarPagosViewsDir = join(import.meta.dirname, '..', 'src', 'procesar-pagos-alumnos', 'views');
+const administrarCursosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-cursos', 'views');
+const inscribirAlumnoViewsDir = join(import.meta.dirname, '..', 'src', 'inscribir-alumno', 'views');
 //configurar el motor de plantillas para generar vistas porque usamos el patrón MVC
 //https://docs.nestjs.com/http/mvc
 
@@ -18,7 +20,7 @@ async function bootstrap() {
   app.useStaticAssets(join(import.meta.dirname, '..', 'public')); //definir directorio para archivos estáticos que necesitamos servir, por ej, CSS y JS de bootstrap
 
   //agregar una linea para las vistas de cáda módulo del sistema 
-  app.setBaseViewsDir(procesarPagosViewsDir); //definir directorio donde se obtienen las plantillas que usaremos para generar las vistas
+  app.setBaseViewsDir([procesarPagosViewsDir, administrarCursosViewsDir, inscribirAlumnoViewsDir]);
   hbs.registerPartials(join(procesarPagosViewsDir, 'partials'))
   app.setViewEngine('hbs');
 

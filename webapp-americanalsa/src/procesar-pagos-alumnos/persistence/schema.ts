@@ -1,4 +1,4 @@
-import { pgTable, integer, varchar, timestamp, decimal, date, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, integer, varchar, timestamp, decimal, date, time, pgEnum } from "drizzle-orm/pg-core"
 
 const MAX_NAME_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 100;
@@ -45,6 +45,7 @@ export const planificacionCursoTable = pgTable('planificacion_curso', {
 	precioMatricula: decimal('precio_matricula', { mode: "number", precision: DIGITOS_PRECISION_NUMEROS_REALES, scale: DIGITOS_DECIMALES_NUMEROS_REALES }).notNull(),
 	fechaInicio: timestamp('fecha_inicio', { mode: "date", withTimezone: true }).notNull(),
 	fechaFin: timestamp('fecha_fin', { mode: "date", withTimezone: true }).notNull(),
+	cantidadClases: integer('cantidad_clases').notNull().default(16),
 	cursoId: integer('curso_id').notNull().references(() => cursoTable.id),
 	...timestampsSchema
 });
@@ -85,5 +86,31 @@ export const pagoMatriculacionAlumnoTable = pgTable('pago_matriculacion_alumno',
 	...timestampsSchema
 });
 
+export const empleadoTable = pgTable('empleado', {
+	id: integer().generatedAlwaysAsIdentity().primaryKey(),
+	nombre: varchar({ length: MAX_NAME_LENGTH }).notNull(),
+	apellido: varchar({ length: MAX_NAME_LENGTH }).notNull(),
+	...timestampsSchema
+});
 
+export const rolAsignacionEnum = pgEnum('rol_asignacion', ['instructor', 'interprete', 'teatro']);
+
+export const asignacionCursoTable = pgTable('asignacion_curso', {
+	id: integer().generatedAlwaysAsIdentity().primaryKey(),
+	planificacionCursoId: integer('planificacion_curso_id').notNull().references(() => planificacionCursoTable.id),
+	empleadoId: integer('empleado_id').notNull().references(() => empleadoTable.id),
+	rol: rolAsignacionEnum().notNull(),
+	...timestampsSchema
+});
+
+export const diaSemanaEnum = pgEnum('dia_semana', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']);
+
+export const horarioCursoTable = pgTable('horario_curso', {
+	id: integer().generatedAlwaysAsIdentity().primaryKey(),
+	planificacionCursoId: integer('planificacion_curso_id').notNull().references(() => planificacionCursoTable.id),
+	diaSemana: diaSemanaEnum('dia_semana').notNull(),
+	horaInicio: time('hora_inicio').notNull(),
+	duracionMinutos: integer('duracion_minutos').notNull(),
+	...timestampsSchema
+});
 

@@ -102,7 +102,7 @@ export class ProcesarPagosAlumnosService {
 		}
 	}
 
-	async getInformeDeudaTodos(anio: number = dayjs().year()): Promise<CuentaCorrienteAlumnoInformeV2> {
+	async getInformeDeudaTodos(anio: number = dayjs().year(), alumnoId?: number): Promise<CuentaCorrienteAlumnoInformeV2> {
 
 		const registros = await this.sqlService.getRegistrosTodos(anio);
 		const conceptos = this.mapearAConceptoCuentaCorriente(registros);

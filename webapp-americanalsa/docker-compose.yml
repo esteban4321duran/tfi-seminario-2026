@@ -2,7 +2,7 @@
 
 secrets:
   postgres-18-password:
-    external: true
+    file: ./secrets/postgres-18-password.txt
 
 services:
 
