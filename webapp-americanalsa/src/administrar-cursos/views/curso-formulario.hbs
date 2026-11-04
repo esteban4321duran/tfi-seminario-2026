@@ -1,89 +1,214 @@
 {{#> layout}}
-<main class="container py-4">
-	<h1 class="h3 mb-3">Crear curso</h1>
+<style>
+  body {
+    background: #f3f5f7;
+    color: #18304c;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+  }
 
-	{{#if mensajeError}}
-	<div class="alert alert-danger">{{mensajeError}}</div>
-	{{/if}}
+  .page-panel {
+    background: #fff;
+    border: 1px solid #e0e8f0;
+    border-radius: 12px;
+    padding: 22px 24px 20px;
+  }
 
-	{{#if faltantes.length}}
-	<div class="alert alert-danger">
-		Faltan completar los siguientes campos:
-		<ul class="mb-0">
-			{{#each faltantes}}<li>{{this}}</li>{{/each}}
-		</ul>
-	</div>
-	{{/if}}
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+    font-weight: 800;
+    color: #176fbd;
+    margin-bottom: 8px;
+  }
 
-	<form method="post" action="/administrar-cursos" class="row g-3">
-		<div class="col-md-6">
-			<label for="nombre" class="form-label">Nombre del curso</label>
-			<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}">
-		</div>
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #17314f;
+  }
 
-		<div class="col-md-3">
-			<label for="anio" class="form-label">Año</label>
-			<input type="number" class="form-control" id="anio" name="anio" value="{{valores.anio}}">
-		</div>
+  .mini-form {
+    margin-top: 14px;
+  }
 
-		<div class="col-md-3">
-			<label for="cuatrimestre" class="form-label">Cuatrimestre</label>
-			<select class="form-select" id="cuatrimestre" name="cuatrimestre">
-				{{#each cuatrimestres}}
-				<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
-				{{/each}}
-			</select>
-		</div>
+  .mini-form .form-label {
+    color: #344c67;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
 
-		<div class="col-md-6">
-			<label for="instructoraId" class="form-label">Instructora</label>
-			<select class="form-select" id="instructoraId" name="instructoraId">
-				<option value="">Seleccione...</option>
-				{{#each instructoras}}
-				<option value="{{this.id}}" {{#if this.seleccionada}}selected{{/if}}>{{this.apellido}}, {{this.nombre}}</option>
-				{{/each}}
-			</select>
-		</div>
+  .mini-form .form-control,
+  .mini-form .form-select {
+    background-color: #fff;
+    border: 1px solid #d7e1eb;
+    color: #294361;
+    border-radius: 7px;
+    min-height: 41px;
+  }
 
-		<div class="col-md-6">
-			<label for="cantidadClases" class="form-label">Cantidad de clases</label>
-			<input type="number" min="1" class="form-control" id="cantidadClases" name="cantidadClases" value="{{valores.cantidadClases}}">
-		</div>
+  .mini-form .form-control:focus,
+  .mini-form .form-select:focus {
+    border-color: #3987d5;
+    box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+  }
 
-		<div class="col-12">
-			<label class="form-label d-block">Días de clase</label>
-			{{#each dias}}
-			<div class="form-check form-check-inline">
-				<input class="form-check-input" type="checkbox" id="dia-{{this.valor}}" name="dias" value="{{this.valor}}" {{#if this.marcado}}checked{{/if}}>
-				<label class="form-check-label" for="dia-{{this.valor}}">{{this.etiqueta}}</label>
-			</div>
-			{{/each}}
-		</div>
+  .mini-form .form-select option {
+    background: #fff;
+    color: #24384f;
+  }
 
-		<div class="col-md-3">
-			<label for="horaInicio" class="form-label">Hora de inicio</label>
-			<input type="time" class="form-control" id="horaInicio" name="horaInicio" value="{{valores.horaInicio}}">
-		</div>
+  .mini-form .form-control::placeholder {
+    color: #8a9aad;
+  }
 
-		<div class="col-md-3">
-			<label for="duracionMinutos" class="form-label">Duración (minutos)</label>
-			<input type="number" min="1" class="form-control" id="duracionMinutos" name="duracionMinutos" value="{{valores.duracionMinutos}}">
-		</div>
+  .mini-form .form-check-input {
+    background-color: #fff;
+    border-color: #b9c9d9;
+  }
 
-		<div class="col-md-3">
-			<label for="precioCuota" class="form-label">Precio cuota (opcional)</label>
-			<input type="number" min="0" step="0.01" class="form-control" id="precioCuota" name="precioCuota" value="{{valores.precioCuota}}">
-		</div>
+  .mini-form .form-check-input:checked {
+    background-color: #287bd0;
+    border-color: #287bd0;
+  }
 
-		<div class="col-md-3">
-			<label for="precioMatricula" class="form-label">Precio matrícula (opcional)</label>
-			<input type="number" min="0" step="0.01" class="form-control" id="precioMatricula" name="precioMatricula" value="{{valores.precioMatricula}}">
-		</div>
+  .mini-form .form-check-label {
+    color: #344c67;
+    font-size: 13px;
+  }
 
-		<div class="col-12">
-			<button type="submit" class="btn btn-primary">Guardar curso</button>
-			<a href="/administrar-cursos" class="btn btn-secondary">Cancelar</a>
-		</div>
-	</form>
-</main>
+  .alert {
+    border-radius: 8px;
+  }
+
+  .btn-primary-submit {
+    background: #287bd0;
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .btn-primary-submit:hover,
+  .btn-primary-submit:focus-visible {
+    background: #1d69b7;
+    color: #fff;
+  }
+
+  .btn-secondary-soft {
+    background: #fff;
+    border: 1px solid #d7e1eb;
+    color: #294361;
+    border-radius: 7px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .btn-secondary-soft:hover,
+  .btn-secondary-soft:focus-visible {
+    background: #f3f6fa;
+    border-color: #c5d3e1;
+    color: #18304c;
+  }
+
+  @media (max-width: 700px) {
+    .page-panel {
+      padding: 18px 14px;
+    }
+  }
+</style>
+
+<section class="page-panel">
+  <h1>Curso</h1>
+
+      {{#if mensajeError}}
+      <div class="alert alert-danger mt-3">{{mensajeError}}</div>
+      {{/if}}
+
+      {{#if faltantes.length}}
+      <div class="alert alert-danger mt-3">
+        Faltan completar los siguientes campos:
+        <ul class="mb-0">
+          {{#each faltantes}}<li>{{this}}</li>{{/each}}
+        </ul>
+      </div>
+      {{/if}}
+
+      <form method="post" action="/administrar-cursos" class="row g-3 mini-form">
+        <div class="col-md-6">
+          <label for="nombre" class="form-label">Nombre del curso</label>
+          <input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" placeholder="Ej. Inglés para adultos">
+        </div>
+
+        <div class="col-md-6">
+          <label for="anio" class="form-label">Año</label>
+          <input type="number" min="2000" step="1" class="form-control" id="anio" name="anio" value="{{valores.anio}}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="cuatrimestre" class="form-label">Cuatrimestre</label>
+          <select class="form-select" id="cuatrimestre" name="cuatrimestre">
+            {{#each cuatrimestres}}
+            <option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="instructoraId" class="form-label">Instructora</label>
+          <select class="form-select" id="instructoraId" name="instructoraId">
+            <option value="">Seleccione...</option>
+            {{#each instructoras}}
+            <option value="{{this.id}}" {{#if this.seleccionada}}selected{{/if}}>{{this.apellido}}, {{this.nombre}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="cantidadClases" class="form-label">Cantidad de clases</label>
+          <input type="number" min="1" class="form-control" id="cantidadClases" name="cantidadClases" value="{{valores.cantidadClases}}" placeholder="15">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label d-block">Días de clase</label>
+          {{#each dias}}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="dia-{{this.valor}}" name="dias" value="{{this.valor}}" {{#if this.marcado}}checked{{/if}}>
+            <label class="form-check-label" for="dia-{{this.valor}}">{{this.etiqueta}}</label>
+          </div>
+          {{/each}}
+        </div>
+
+        <div class="col-md-3">
+          <label for="horaInicio" class="form-label">Hora de inicio</label>
+          <input type="time" class="form-control" id="horaInicio" name="horaInicio" value="{{valores.horaInicio}}">
+        </div>
+
+        <div class="col-md-3">
+          <label for="duracionMinutos" class="form-label">Duración (minutos)</label>
+          <input type="number" min="1" class="form-control" id="duracionMinutos" name="duracionMinutos" value="{{valores.duracionMinutos}}">
+        </div>
+
+        <div class="col-md-3">
+          <label for="precioCuota" class="form-label">Precio cuota (opcional)</label>
+          <input type="number" min="0" step="0.01" class="form-control" id="precioCuota" name="precioCuota" value="{{valores.precioCuota}}">
+        </div>
+
+        <div class="col-md-3">
+          <label for="precioMatricula" class="form-label">Precio matrícula (opcional)</label>
+          <input type="number" min="0" step="0.01" class="form-control" id="precioMatricula" name="precioMatricula" value="{{valores.precioMatricula}}">
+        </div>
+
+        <div class="col-12 mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-primary-submit">Guardar curso</button>
+          <a href="/administrar-cursos" class="btn btn-secondary-soft">Cancelar</a>
+        </div>
+      </form>
+    </section>
 {{/layout}}

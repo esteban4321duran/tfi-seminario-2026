@@ -1,6 +1,140 @@
-{{#> layout}}
-<main class="container py-4">
-	<h1 class="h3 mb-3">Inscribir alumno a un curso</h1>
+{{#> layout esInscripciones=true}}
+<style>
+	.enrollment-page {
+		color: #18304c;
+		padding: 10px 8px 22px;
+	}
+
+	.enrollment-heading {
+		margin: 8px 0 20px;
+	}
+
+	.enrollment-eyebrow {
+		color: #176fbd;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		margin-bottom: 8px;
+	}
+
+	.enrollment-heading h1 {
+		color: #17314f;
+		font-size: 28px;
+		font-weight: 800;
+		margin: 0 0 6px;
+	}
+
+	.enrollment-heading p {
+		color: #6b7f96;
+		margin: 0;
+	}
+
+	.enrollment-panel {
+		background: #fff;
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+		margin-bottom: 16px;
+		padding: 18px;
+	}
+
+	.enrollment-panel h2 {
+		color: #18304c;
+		font-size: 15px;
+		font-weight: 800;
+		margin: 0 0 14px;
+	}
+
+	.enrollment-page .form-label {
+		color: #344c67;
+		font-size: 13px;
+		font-weight: 700;
+		margin-bottom: 6px;
+	}
+
+	.enrollment-page .form-control,
+	.enrollment-page .form-select {
+		border-color: #d7e1eb;
+		border-radius: 7px;
+		color: #294361;
+		min-height: 41px;
+	}
+
+	.enrollment-page .form-control:focus,
+	.enrollment-page .form-select:focus {
+		border-color: #3987d5;
+		box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+	}
+
+	.enrollment-search {
+		border-bottom: 1px solid #e8edf2;
+		margin-bottom: 16px;
+		padding-bottom: 14px;
+	}
+
+	.enrollment-submit {
+		background: #287bd0;
+		border: 0;
+		border-radius: 7px;
+		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		padding: 10px 16px;
+	}
+
+	.enrollment-submit:hover {
+		background: #1d69b7;
+		color: #fff;
+	}
+
+	.enrollment-table {
+		margin: 0;
+		vertical-align: middle;
+	}
+
+	.enrollment-table th {
+		border-bottom-color: #dfe7ef;
+		color: #72849a;
+		font-size: 11px;
+		font-weight: 800;
+		padding: 10px 8px;
+		text-transform: uppercase;
+	}
+
+	.enrollment-table td {
+		border-bottom-color: #edf1f5;
+		color: #294361;
+		font-size: 13px;
+		padding: 12px 8px;
+	}
+
+	.enrollment-status {
+		background: #e3f5ee;
+		border-radius: 20px;
+		color: #16835d;
+		display: inline-block;
+		font-size: 11px;
+		font-weight: 800;
+		padding: 4px 9px;
+	}
+
+	@media (max-width: 700px) {
+		.enrollment-page {
+			padding: 4px 0 16px;
+		}
+
+		.enrollment-panel {
+			padding: 14px;
+		}
+	}
+</style>
+
+<div class="enrollment-page">
+	<header class="enrollment-heading">
+		<div class="enrollment-eyebrow">Ingreso y matrícula</div>
+		<h1>Inscripciones</h1>
+		<p>Vinculá un alumno con un curso disponible.</p>
+	</header>
 
 	{{#if mensajeError}}
 	<div class="alert alert-danger">
@@ -22,56 +156,88 @@
 	</div>
 	{{/if}}
 
-	<section class="mb-4">
-		<h2 class="h5">¿El alumno ya está registrado?</h2>
-		<form method="get" action="/inscribir-alumno" class="row g-2">
-			<div class="col-md-6">
-				<input type="text" class="form-control" name="buscar" placeholder="Buscar por apellido o nombre" value="{{buscar}}">
-			</div>
-			<div class="col-auto"><button type="submit" class="btn btn-secondary">Buscar</button></div>
-		</form>
-		{{#if hayBusqueda}}
-			{{#if encontrados.length}}
-			<ul class="list-group mt-2">
-				{{#each encontrados}}
-				<li class="list-group-item d-flex justify-content-between align-items-center">
-					{{this.apellido}}, {{this.nombre}}
-					<a class="btn btn-sm btn-outline-primary" href="/inscribir-alumno?alumnoId={{this.id}}">Elegir</a>
-				</li>
-				{{/each}}
-			</ul>
-			{{else}}
-			<div class="alert alert-info mt-2">No se encontraron alumnos. Complete los datos abajo para cargarlo como alumno nuevo.</div>
+	<section class="enrollment-panel">
+		<h2>Nueva inscripción</h2>
+		<div class="enrollment-search">
+			<form method="get" action="/inscribir-alumno" class="row g-2 align-items-end">
+				<div class="col-md-6">
+					<label for="buscar" class="form-label">Buscar alumno</label>
+					<input type="text" class="form-control" id="buscar" name="buscar" placeholder="Buscar por apellido o nombre" value="{{buscar}}">
+				</div>
+				<div class="col-auto"><button type="submit" class="btn btn-outline-primary">Buscar</button></div>
+			</form>
+			{{#if hayBusqueda}}
+				{{#if encontrados.length}}
+				<ul class="list-group mt-2">
+					{{#each encontrados}}
+					<li class="list-group-item d-flex justify-content-between align-items-center">
+						{{this.apellido}}, {{this.nombre}}
+						<a class="btn btn-sm btn-outline-primary" href="/inscribir-alumno?alumnoId={{this.id}}&buscar={{../buscar}}">Elegir</a>
+					</li>
+					{{/each}}
+				</ul>
+				{{else}}
+				<div class="alert alert-info mt-2 mb-0">No se encontraron alumnos registrados.</div>
+				{{/if}}
 			{{/if}}
-		{{/if}}
+		</div>
+
+		<form method="post" action="/inscribir-alumno" class="row g-3">
+			<input type="hidden" name="alumnoId" value="{{valores.alumnoId}}">
+			<div class="col-md-6">
+				<label for="apellido" class="form-label">Apellido</label>
+				<input type="text" class="form-control" id="apellido" name="apellido" value="{{valores.apellido}}" placeholder="Seleccioná un alumno" readonly required>
+			</div>
+			<div class="col-md-6">
+				<label for="nombre" class="form-label">Nombre</label>
+				<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" placeholder="Seleccioná un alumno" readonly required>
+			</div>
+			<div class="col-md-6">
+				<label for="planificacionCursoId" class="form-label">Curso</label>
+				<select class="form-select" id="planificacionCursoId" name="planificacionCursoId" required>
+					<option value="">Seleccione...</option>
+					{{#each cursos}}
+					<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
+					{{/each}}
+				</select>
+			</div>
+			<div id="newStudentFields" class="row g-3 enrollment-new-student mt-0" {{#unless nuevoAlumno}}hidden{{/unless}}>
+				<div class="col-md-6">
+					<label for="apellido" class="form-label">Apellido</label>
+					<input type="text" class="form-control" id="apellido" name="apellido" value="{{valores.apellido}}" {{#if nuevoAlumno}}required{{/if}}>
+				</div>
+				<div class="col-md-6">
+					<label for="nombre" class="form-label">Nombre</label>
+					<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" {{#if nuevoAlumno}}required{{/if}}>
+				</div>
+			</div>
+			<div class="col-12 d-flex gap-2">
+				<button type="submit" class="btn enrollment-submit">Inscribir</button>
+				<a href="/inscribir-alumno" class="btn btn-outline-secondary">Limpiar</a>
+			</div>
+		</form>
 	</section>
 
-	<form method="post" action="/inscribir-alumno" class="row g-3">
-		<input type="hidden" name="alumnoId" value="{{valores.alumnoId}}">
-
-		<div class="col-md-6">
-			<label for="apellido" class="form-label">Apellido</label>
-			<input type="text" class="form-control" id="apellido" name="apellido" value="{{valores.apellido}}" {{#if alumnoElegido}}readonly{{/if}}>
-		</div>
-		<div class="col-md-6">
-			<label for="nombre" class="form-label">Nombre</label>
-			<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" {{#if alumnoElegido}}readonly{{/if}}>
-		</div>
-
-		<div class="col-12">
-			<label for="planificacionCursoId" class="form-label">Curso</label>
-			<select class="form-select" id="planificacionCursoId" name="planificacionCursoId">
-				<option value="">Seleccione...</option>
-				{{#each cursos}}
-				<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
-				{{/each}}
-			</select>
-		</div>
-
-		<div class="col-12">
-			<button type="submit" class="btn btn-primary">Inscribir</button>
-			<a href="/inscribir-alumno" class="btn btn-secondary">Limpiar</a>
-		</div>
-	</form>
-</main>
+	<section class="enrollment-panel">
+		<h2>Inscripciones registradas</h2>
+		<div class="table-responsive">
+			<table class="table enrollment-table">
+				<thead>
+					<tr><th>Alumno</th><th>Curso</th><th>Fecha</th></tr>
+				</thead>
+				<tbody>
+					{{#each inscripciones}}
+					<tr>
+						<td>{{this.alumno}}</td>
+						<td>{{this.curso}}</td>
+						<td>{{this.fecha}}</td>
+					</tr>
+					{{else}}
+					<tr><td colspan="3" class="text-secondary">Todavía no hay inscripciones registradas.</td></tr>
+					{{/each}}
+				</tbody>
+			</table>
+			</div>
+	</section>
+	</div>
 {{/layout}}

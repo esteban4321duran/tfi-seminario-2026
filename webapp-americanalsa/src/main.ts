@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import hbs from 'hbs'
 
+const sharedViewsDir = join(import.meta.dirname, '..', 'src', 'views');
 const procesarPagosViewsDir = join(import.meta.dirname, '..', 'src', 'procesar-pagos-alumnos', 'views');
 const administrarCursosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-cursos', 'views');
 const inscribirAlumnoViewsDir = join(import.meta.dirname, '..', 'src', 'inscribir-alumno', 'views');
@@ -19,11 +20,10 @@ async function bootstrap() {
   );
   app.useStaticAssets(join(import.meta.dirname, '..', 'public')); //definir directorio para archivos estáticos que necesitamos servir, por ej, CSS y JS de bootstrap
 
-  //agregar una linea para las vistas de cáda módulo del sistema 
-  app.setBaseViewsDir([procesarPagosViewsDir, administrarCursosViewsDir, inscribirAlumnoViewsDir]);
-  hbs.registerPartials(join(procesarPagosViewsDir, 'partials'))
+  // registro global de vistas y partials compartidos
+  app.setBaseViewsDir([sharedViewsDir, procesarPagosViewsDir, administrarCursosViewsDir, inscribirAlumnoViewsDir]);
+  hbs.registerPartials(join(sharedViewsDir, 'partials'));
   app.setViewEngine('hbs');
-
 
   await app.listen(process.env.PORT ?? 3000);
 }

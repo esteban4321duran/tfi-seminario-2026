@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import dayjs from 'dayjs';
 import { InscribirAlumnoService } from '../application/inscribir-alumno.service.js';
 import type { InscribirAlumnoDto, ResultadoInscripcion } from '../application/inscribir-alumno.service.js';
 
@@ -34,12 +35,23 @@ export class InscribirAlumnoController {
 
 	private async vista(valores: InscribirAlumnoDto, resultado?: ResultadoInscripcion, buscar?: string) {
 		const cursos = await this.service.getCursosDisponibles();
-		const encontrados = buscar && buscar.trim() ? await this.service.buscarAlumnos(buscar) : [];
+		const encontrados = buscar?.trim() ? await this.service.buscarAlumnos(buscar) : [];
+		const inscripciones = await this.service.listarInscripciones();
 		const error = resultado && !resultado.ok ? resultado : undefined;
 		return {
+			esInscripciones: true,
+			fechaActual: dayjs().format('DD/MM/YYYY'),
 			buscar: buscar ?? '',
-			encontrados,
-			hayBusqueda: !!(buscar && buscar.trim()),
+			encontrados: encontrados.map((alumno) => ({
+				...alumno,
+				seleccionado: String(alumno.id) === valores.alumnoId,
+			})),
+			hayBusqueda: !!buscar?.trim(),
+			inscripciones: inscripciones.map((i) => ({
+				...i,
+				alumno: `${i.nombre} ${i.apellido}`,
+				fecha: dayjs(i.creadoEn).format('DD/MM/YYYY'),
+			})),
 			alumnoElegido: !!valores.alumnoId,
 			valores: { alumnoId: valores.alumnoId ?? '', apellido: valores.apellido ?? '', nombre: valores.nombre ?? '' },
 			cursos: cursos.map((c) => ({ ...c, seleccionado: String(c.id) === valores.planificacionCursoId })),
