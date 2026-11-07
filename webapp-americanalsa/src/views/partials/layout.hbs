@@ -223,15 +223,15 @@
 
         <nav class="sidebar-nav" aria-label="Navegación principal">
           <a class="nav-link" href="/"><span class="nav-dot"></span>Resumen</a>
-          <a class="nav-link {{#unless esInscripciones}}active{{/unless}}" href="/administrar-cursos"><span class="nav-dot"></span>Cursos</a>
+          <a class="nav-link {{#if esCursos}}active{{/if}}" href="/administrar-cursos"><span class="nav-dot"></span>Cursos</a>
           <a class="nav-link {{#if esInscripciones}}active{{/if}}" href="/inscribir-alumno"><span class="nav-dot"></span>Inscripciones</a>
-          <a class="nav-link" href="/procesar-pagos-alumnos/informe-todos?anio=2026"><span class="nav-dot"></span>Cuotas</a>
+          <a class="nav-link {{#if esCuotas}}active{{/if}}" href="/cuotas"><span class="nav-dot"></span>Cuotas</a>
         </nav>
       </aside>
 
       <main class="app-main">
         <header class="app-header">
-          <div class="app-breadcrumb"><strong>Americana</strong> / <span style="color:#5d6b7d;">{{#if esInscripciones}}Inscripciones{{else}}Cursos{{/if}}</span></div>
+          <div class="app-breadcrumb"><strong>Americana</strong> / <span style="color:#5d6b7d;">{{#if esCuotas}}Cuotas{{else}}{{#if esInscripciones}}Inscripciones{{else}}Cursos{{/if}}{{/if}}</span></div>
           <div class="admin-pill">
             <span class="admin-avatar">AD</span>
             <span class="admin-meta">

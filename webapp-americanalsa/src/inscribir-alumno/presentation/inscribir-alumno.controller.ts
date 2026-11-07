@@ -27,8 +27,7 @@ export class InscribirAlumnoController {
 	async inscribir(@Body() body: InscribirAlumnoDto, @Res() res: Response) {
 		const resultado = await this.service.inscribir(body);
 		if (resultado.ok) {
-			// muestra la cuenta corriente actualizada del alumno
-			return res.redirect(`/procesar-pagos-alumnos/informe-todos?anio=${resultado.anio}&alumnoId=${resultado.alumnoId}`);
+			return res.redirect(`/cuotas?anio=${resultado.anio}&alumnoId=${resultado.alumnoId}`);
 		}
 		return res.status(400).render('inscripcion-formulario', await this.vista(body, resultado));
 	}

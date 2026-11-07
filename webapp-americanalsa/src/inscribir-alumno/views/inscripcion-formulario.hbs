@@ -201,16 +201,6 @@
 					{{/each}}
 				</select>
 			</div>
-			<div id="newStudentFields" class="row g-3 enrollment-new-student mt-0" {{#unless nuevoAlumno}}hidden{{/unless}}>
-				<div class="col-md-6">
-					<label for="apellido" class="form-label">Apellido</label>
-					<input type="text" class="form-control" id="apellido" name="apellido" value="{{valores.apellido}}" {{#if nuevoAlumno}}required{{/if}}>
-				</div>
-				<div class="col-md-6">
-					<label for="nombre" class="form-label">Nombre</label>
-					<input type="text" class="form-control" id="nombre" name="nombre" value="{{valores.nombre}}" {{#if nuevoAlumno}}required{{/if}}>
-				</div>
-			</div>
 			<div class="col-12 d-flex gap-2">
 				<button type="submit" class="btn enrollment-submit">Inscribir</button>
 				<a href="/inscribir-alumno" class="btn btn-outline-secondary">Limpiar</a>
@@ -219,7 +209,7 @@
 	</section>
 
 	<section class="enrollment-panel">
-		<h2>Inscripciones registradas</h2>
+		<h2>Inscripciones recientes</h2>
 		<div class="table-responsive">
 			<table class="table enrollment-table">
 				<thead>

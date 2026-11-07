@@ -1,4 +1,4 @@
-import { pgTable, integer, varchar, timestamp, decimal, date, time, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, integer, varchar, timestamp, decimal, date, time, pgEnum } from 'drizzle-orm/pg-core';
 
 const MAX_NAME_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 100;
@@ -113,4 +113,3 @@ export const horarioCursoTable = pgTable('horario_curso', {
 	duracionMinutos: integer('duracion_minutos').notNull(),
 	...timestampsSchema
 });
-

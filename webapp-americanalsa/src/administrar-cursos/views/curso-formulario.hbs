@@ -196,13 +196,13 @@
         </div>
 
         <div class="col-md-3">
-          <label for="precioCuota" class="form-label">Precio cuota (opcional)</label>
-          <input type="number" min="0" step="0.01" class="form-control" id="precioCuota" name="precioCuota" value="{{valores.precioCuota}}">
+          <label for="precioCuota" class="form-label">Precio cuota</label>
+          <input type="number" min="0" max="999999999.99" step="0.01" class="form-control" id="precioCuota" name="precioCuota" value="{{valores.precioCuota}}" required>
         </div>
 
         <div class="col-md-3">
-          <label for="precioMatricula" class="form-label">Precio matrícula (opcional)</label>
-          <input type="number" min="0" step="0.01" class="form-control" id="precioMatricula" name="precioMatricula" value="{{valores.precioMatricula}}">
+          <label for="precioMatricula" class="form-label">Precio matrícula</label>
+          <input type="number" min="0" max="999999999.99" step="0.01" class="form-control" id="precioMatricula" name="precioMatricula" value="{{valores.precioMatricula}}" required>
         </div>
 
         <div class="col-12 mt-4 d-flex gap-2">

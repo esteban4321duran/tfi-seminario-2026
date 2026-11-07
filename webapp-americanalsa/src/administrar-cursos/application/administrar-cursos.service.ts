@@ -1,77 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDrizzle } from '@nestjs/drizzle';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
-import {
-	asignacionCursoTable, cuotaTable, cursoTable, empleadoTable, horarioCursoTable,
-	matriculaTable, planificacionCursoTable,
-} from '../../procesar-pagos-alumnos/persistence/schema.js';
+import { CUATRIMESTRES, calcularFechasCuatrimestre, cuatrimestreDeFecha, esCuatrimestre, etiquetaCuatrimestre, type Cuatrimestre } from '../../core/application/cuatrimestre.js';
+import { DIAS_SEMANA, normalizarDias, type DiaSemana } from '../domain/curso.domain.js';
+import { CursoRepository } from '../persistence/curso.repository.js';
+import type { CrearCursoDto, CursoListado, ResultadoCrearCurso } from './curso.types.js';
 
-export const DIAS_SEMANA = [
-	{ valor: 'lunes', etiqueta: 'Lunes' },
-	{ valor: 'martes', etiqueta: 'Martes' },
-	{ valor: 'miercoles', etiqueta: 'Miércoles' },
-	{ valor: 'jueves', etiqueta: 'Jueves' },
-	{ valor: 'viernes', etiqueta: 'Viernes' },
-	{ valor: 'sabado', etiqueta: 'Sábado' },
-] as const;
-
-type DiaSemana = (typeof DIAS_SEMANA)[number]['valor'];
-
-// meses en base 0 (2 = marzo, 5 = junio, 7 = agosto, 10 = noviembre)
-const CUATRIMESTRES: Record<number, { mesInicio: number; mesFin: number }> = {
-	1: { mesInicio: 2, mesFin: 5 },
-	2: { mesInicio: 7, mesFin: 10 },
-};
-
-export interface CrearCursoDto {
-	nombre?: string;
-	anio?: string;
-	cuatrimestre?: string;
-	instructoraId?: string;
-	dias?: string | string[];
-	horaInicio?: string;
-	duracionMinutos?: string;
-	cantidadClases?: string;
-	precioCuota?: string;
-	precioMatricula?: string;
+function leerPrecio(valor?: string): number | undefined {
+	const texto = valor?.trim();
+	if (!texto || !/^\d+(?:\.\d{1,2})?$/.test(texto)) return undefined;
+	const precio = Number(texto);
+	return Number.isFinite(precio) && precio <= 999_999_999.99 ? precio : undefined;
 }
 
-export type ResultadoCrearCurso =
-	| { ok: true; planificacionId: number }
-	| { ok: false; tipo: 'faltan_datos'; faltantes: string[] }
-	| { ok: false; tipo: 'curso_existente'; mensaje: string };
-
-export interface CursoListado {
-	id: number;
-	nombre: string;
-	cuatrimestre: string;
-	instructora: string | null;
-	horarios: string[];
-	cantidadClases: number;
-}
-
-export function normalizarDias(dias?: string | string[]): DiaSemana[] {
-	const lista = dias === undefined ? [] : Array.isArray(dias) ? dias : [dias];
-	return DIAS_SEMANA.map((d) => d.valor).filter((d) => lista.includes(d));
+function crearCuotasDelCuatrimestre(anio: number, cuatrimestre: Cuatrimestre) {
+	const { mesInicio, mesFin } = CUATRIMESTRES[cuatrimestre];
+	const cuotas: Date[] = [];
+	for (let mes = mesInicio; mes <= mesFin; mes++) {
+		cuotas.push(new Date(Date.UTC(anio, mes, 1)));
+	}
+	return cuotas;
 }
 
 @Injectable()
 export class AdministrarCursosService {
 	constructor(
-		@InjectDrizzle()
-		private readonly db: NodePgDatabase,
+		private readonly repository: CursoRepository,
 	) { }
 
-	async getInstructoras() {
-		return this.db
-			.select({ id: empleadoTable.id, nombre: empleadoTable.nombre, apellido: empleadoTable.apellido })
-			.from(empleadoTable)
-			.where(isNull(empleadoTable.borradoEn))
-			.orderBy(asc(empleadoTable.apellido), asc(empleadoTable.nombre));
-	}
-
-	async crear(dto: CrearCursoDto): Promise<ResultadoCrearCurso> {
+	private async validarDatos(dto: CrearCursoDto): Promise<
+		| { ok: true; datos: {
+				nombre: string;
+				instructoraId: number;
+				dias: DiaSemana[];
+				horaInicio: string;
+				duracionMinutos: number;
+				cantidadClases: number;
+				anio: number;
+				cuatrimestre: Cuatrimestre;
+				precioCuota: number;
+				precioMatricula: number;
+			} }
+		| { ok: false; tipo: 'faltan_datos'; faltantes: string[] }
+	> {
 		const faltantes: string[] = [];
 
 		const nombre = (dto.nombre ?? '').trim();
@@ -80,10 +49,8 @@ export class AdministrarCursosService {
 		const instructoraId = Number(dto.instructoraId);
 		if (!Number.isInteger(instructoraId) || instructoraId <= 0) {
 			faltantes.push('Instructora');
-		} else {
-			const [instructora] = await this.db.select({ id: empleadoTable.id }).from(empleadoTable)
-				.where(and(eq(empleadoTable.id, instructoraId), isNull(empleadoTable.borradoEn))).limit(1);
-			if (!instructora) faltantes.push('Instructora');
+		} else if (!(await this.repository.existeInstructora(instructoraId))) {
+			faltantes.push('Instructora');
 		}
 
 		const dias = normalizarDias(dto.dias);
@@ -102,113 +69,81 @@ export class AdministrarCursosService {
 		if (!Number.isInteger(anio) || anio < 2000) faltantes.push('Año');
 
 		const cuatrimestre = Number(dto.cuatrimestre);
-		if (!(cuatrimestre in CUATRIMESTRES)) faltantes.push('Cuatrimestre');
+		if (!esCuatrimestre(cuatrimestre)) faltantes.push('Cuatrimestre');
 
-		if (faltantes.length > 0) {
+		const precioCuota = leerPrecio(dto.precioCuota);
+		if (precioCuota === undefined) faltantes.push('Precio de cuota');
+
+		const precioMatricula = leerPrecio(dto.precioMatricula);
+		if (precioMatricula === undefined) faltantes.push('Precio de matrícula');
+
+		if (faltantes.length > 0 || precioCuota === undefined || precioMatricula === undefined) {
 			return { ok: false, tipo: 'faltan_datos', faltantes };
 		}
 
-		// ¿ya existe el curso en ese cuatrimestre?
-		const [cursoExistente] = await this.db.select({ id: cursoTable.id }).from(cursoTable)
-			.where(and(sql`lower(${cursoTable.nombre}) = lower(${nombre})`, isNull(cursoTable.borradoEn)))
-			.limit(1);
+		const cuatrimestreValido = cuatrimestre as Cuatrimestre;
+		return {
+			ok: true,
+			datos: {
+				nombre,
+				instructoraId,
+				dias,
+				horaInicio,
+				duracionMinutos,
+				cantidadClases,
+				anio,
+				cuatrimestre: cuatrimestreValido,
+				precioCuota,
+				precioMatricula,
+			},
+		};
+	}
 
-		if (cursoExistente) {
-			const [duplicado] = await this.db.select({ id: planificacionCursoTable.id }).from(planificacionCursoTable)
-				.where(and(
-					eq(planificacionCursoTable.cursoId, cursoExistente.id),
-					isNull(planificacionCursoTable.borradoEn),
-					sql`EXTRACT(YEAR FROM ${planificacionCursoTable.fechaInicio}) = ${anio}`,
-					sql`(EXTRACT(MONTH FROM ${planificacionCursoTable.fechaInicio}) <= 6) = ${cuatrimestre === 1}`,
-				)).limit(1);
-			if (duplicado) {
-				return {
-					ok: false,
-					tipo: 'curso_existente',
-					mensaje: `El curso "${nombre}" ya existe en el ${cuatrimestre === 1 ? '1er' : '2do'} cuatrimestre de ${anio}.`,
-				};
-			}
+	async getInstructoras() {
+		return this.repository.getInstructoras();
+	}
+
+	async crear(dto: CrearCursoDto): Promise<ResultadoCrearCurso> {
+		const validacion = await this.validarDatos(dto);
+		if (!validacion.ok) {
+			return validacion;
 		}
 
-		const { mesInicio, mesFin } = CUATRIMESTRES[cuatrimestre];
-		const fechaInicio = new Date(anio, mesInicio, 1, 9, 0);
-		const fechaFin = new Date(anio, mesFin + 1, 0, 12, 0); // último día del mes de fin
-
-		return await this.db.transaction(async (tx) => {
-			let cursoId = cursoExistente?.id;
-			if (cursoId === undefined) {
-				const [nuevo] = await tx.insert(cursoTable).values({ nombre }).returning({ id: cursoTable.id });
-				cursoId = nuevo.id;
-			}
-
-			// precios: los del formulario o, si no se cargaron, los de la última planificación
-			const [ultima] = await tx
-				.select({ precioCuota: planificacionCursoTable.precioCuota, precioMatricula: planificacionCursoTable.precioMatricula })
-				.from(planificacionCursoTable)
-				.where(isNull(planificacionCursoTable.borradoEn))
-				.orderBy(desc(planificacionCursoTable.fechaInicio)).limit(1);
-			const precioCuota = Number(dto.precioCuota) > 0 ? Number(dto.precioCuota) : (ultima?.precioCuota ?? 0);
-			const precioMatricula = Number(dto.precioMatricula) > 0 ? Number(dto.precioMatricula) : (ultima?.precioMatricula ?? 0);
-
-			const [planificacion] = await tx.insert(planificacionCursoTable)
-				.values({ cursoId, fechaInicio, fechaFin, cantidadClases, precioCuota, precioMatricula })
-				.returning({ id: planificacionCursoTable.id });
-
-			await tx.insert(asignacionCursoTable).values({
-				planificacionCursoId: planificacion.id, empleadoId: instructoraId, rol: 'instructor',
-			});
-
-			await tx.insert(horarioCursoTable).values(
-				dias.map((diaSemana) => ({ planificacionCursoId: planificacion.id, diaSemana, horaInicio, duracionMinutos })),
-			);
-
-			await tx.insert(matriculaTable).values({ planificacionCursoId: planificacion.id });
-
-			const cuotas = [];
-			for (let m = mesInicio; m <= mesFin; m++) {
-				cuotas.push({ planificacionCursoId: planificacion.id, mes: new Date(Date.UTC(anio, m, 1)) });
-			}
-			await tx.insert(cuotaTable).values(cuotas);
-
-			return { ok: true as const, planificacionId: planificacion.id };
+		const { nombre, anio, cuatrimestre, ...datosPlanificacion } = validacion.datos;
+		const { fechaInicio, fechaFin } = calcularFechasCuatrimestre(anio, cuatrimestre);
+		const cuotas = crearCuotasDelCuatrimestre(anio, cuatrimestre);
+		const resultado = await this.repository.crearCursoCompleto({
+			...datosPlanificacion,
+			nombre,
+			fechaInicio,
+			fechaFin,
+			cuotas: cuotas.map((mes) => ({ mes })),
+			rol: 'instructor',
 		});
+
+		if (!resultado.creado) {
+			return {
+				ok: false,
+				tipo: 'curso_existente',
+				mensaje: `El curso "${nombre}" ya existe en el ${etiquetaCuatrimestre(cuatrimestre)} cuatrimestre de ${anio}.`,
+			};
+		}
+
+		return { ok: true as const, planificacionId: resultado.planificacionId };
 	}
 
 	async listar(): Promise<CursoListado[]> {
-		const filas = await this.db.select({
-			id: planificacionCursoTable.id,
-			nombre: cursoTable.nombre,
-			fechaInicio: planificacionCursoTable.fechaInicio,
-			cantidadClases: planificacionCursoTable.cantidadClases,
-			instructoraNombre: empleadoTable.nombre,
-			instructoraApellido: empleadoTable.apellido,
-		})
-			.from(planificacionCursoTable)
-			.innerJoin(cursoTable, eq(cursoTable.id, planificacionCursoTable.cursoId))
-			.leftJoin(asignacionCursoTable, and(
-				eq(asignacionCursoTable.planificacionCursoId, planificacionCursoTable.id),
-				eq(asignacionCursoTable.rol, 'instructor'),
-				isNull(asignacionCursoTable.borradoEn),
-			))
-			.leftJoin(empleadoTable, eq(empleadoTable.id, asignacionCursoTable.empleadoId))
-			.where(isNull(planificacionCursoTable.borradoEn))
-			.orderBy(desc(planificacionCursoTable.fechaInicio), asc(cursoTable.nombre));
-
-		const ids = filas.map((f) => f.id);
-		const horarios = ids.length === 0 ? [] : await this.db.select().from(horarioCursoTable)
-			.where(and(inArray(horarioCursoTable.planificacionCursoId, ids), isNull(horarioCursoTable.borradoEn)));
-
-		const orden = DIAS_SEMANA.map((d) => d.valor as string);
-		return filas.map((f) => ({
-			id: f.id,
-			nombre: f.nombre,
-			cuatrimestre: `${f.fechaInicio.getMonth() <= 5 ? '1er' : '2do'} cuatrimestre ${f.fechaInicio.getFullYear()}`,
-			instructora: f.instructoraApellido ? `${f.instructoraApellido}, ${f.instructoraNombre}` : null,
-			cantidadClases: f.cantidadClases,
-			horarios: horarios
-				.filter((h) => h.planificacionCursoId === f.id)
-				.sort((a, b) => orden.indexOf(a.diaSemana) - orden.indexOf(b.diaSemana))
-				.map((h) => `${DIAS_SEMANA.find((d) => d.valor === h.diaSemana)!.etiqueta} ${h.horaInicio.slice(0, 5)} (${h.duracionMinutos} min)`),
+		const cursos = await this.repository.listarCursos();
+		return cursos.map((curso) => ({
+			id: curso.id,
+			nombre: curso.nombre,
+			cuatrimestre: `${etiquetaCuatrimestre(cuatrimestreDeFecha(curso.fechaInicio))} cuatrimestre ${curso.fechaInicio.getFullYear()}`,
+			instructora: curso.instructoraApellido ? `${curso.instructoraApellido}, ${curso.instructoraNombre}` : null,
+			cantidadClases: curso.cantidadClases,
+			horarios: curso.horarios.map((horario) => {
+				const dia = DIAS_SEMANA.find((d) => d.valor === horario.diaSemana);
+				return `${dia?.etiqueta ?? horario.diaSemana} ${horario.horaInicio.slice(0, 5)} (${horario.duracionMinutos} min)`;
+			}),
 		}));
 	}
 }

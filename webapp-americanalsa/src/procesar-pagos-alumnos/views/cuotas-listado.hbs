@@ -1,0 +1,136 @@
+{{#> layout esCuotas=true}}
+<main class="container-fluid py-3">
+	<header class="d-flex justify-content-between align-items-start gap-3 mb-3">
+		<div>
+			<p class="text-uppercase text-secondary small fw-bold mb-1">Administración financiera</p>
+			<h1 class="h3 mb-1 fw-bold" style="color: #17314f;">Cuotas</h1>
+			<p class="text-secondary mb-0">Consultá las cuentas corrientes y registrá pagos de los alumnos.</p>
+		</div>
+		<a class="btn btn-primary" href="/cuotas/registrar-pago">Registrar pago</a>
+	</header>
+
+	{{#if pagoRegistrado}}
+	<div class="alert alert-success" role="status">El pago se registró correctamente.</div>
+	{{/if}}
+
+	<section class="card mb-3">
+		<div class="card-body">
+			<h2 class="h6 mb-3">Búsqueda de cuentas corrientes</h2>
+			<form method="get" action="/cuotas">
+				{{#if filtros.alumnoId}}<input type="hidden" name="alumnoId" value="{{filtros.alumnoId}}">{{/if}}
+				<div class="row g-3">
+					<div class="col-12 col-md-6 col-xl-3">
+						<label class="form-label" for="buscar">Buscar alumno</label>
+						<input class="form-control" type="search" id="buscar" name="buscar" value="{{filtros.buscar}}" placeholder="Apellido, nombre o DNI">
+					</div>
+					<div class="col-12 col-md-6 col-xl-3">
+						<label class="form-label" for="cursoId">Curso</label>
+						<select class="form-select" id="cursoId" name="cursoId">
+							{{#each cursos}}<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
+						</select>
+					</div>
+					<div class="col-6 col-md-4 col-xl-2">
+						<label class="form-label" for="anio">Año</label>
+						<select class="form-select" id="anio" name="anio">
+							{{#each anios}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
+						</select>
+					</div>
+					<div class="col-6 col-md-4 col-xl-2">
+						<label class="form-label" for="cuatrimestre">Cuatrimestre</label>
+						<select class="form-select" id="cuatrimestre" name="cuatrimestre">
+							{{#each cuatrimestres}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
+						</select>
+					</div>
+					<div class="col-6 col-md-4 col-xl-2">
+						<label class="form-label" for="estado">Estado de cuota</label>
+						<select class="form-select" id="estado" name="estado">
+							{{#each estados}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
+						</select>
+					</div>
+					<div class="col-6 col-md-4 col-xl-2">
+						<label class="form-label" for="mes">Mes de vencimiento</label>
+						<select class="form-select" id="mes" name="mes">
+							{{#each meses}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
+						</select>
+					</div>
+					<div class="col-12 col-md-8 col-xl-6 d-flex flex-wrap align-items-end gap-3">
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="checkbox" id="soloConDeuda" name="soloConDeuda" value="on" {{#if filtros.soloConDeuda}}checked{{/if}}>
+							<label class="form-check-label" for="soloConDeuda">Solo cuentas con saldo vencido</label>
+						</div>
+					</div>
+					<div class="col-12 col-md-8 col-xl-6 d-flex flex-wrap align-items-end justify-content-md-end gap-2">
+						<label class="form-label mb-0" for="orden">Ordenar por</label>
+						<select class="form-select w-auto" id="orden" name="orden">
+							{{#each ordenes}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
+						</select>
+						<button class="btn btn-primary" type="submit">Buscar</button>
+						<a class="btn btn-outline-secondary" href="/cuotas">Limpiar filtros</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</section>
+
+	<section class="card">
+		<div class="card-header bg-white">
+			<h2 class="h6 mb-0">Cuentas corrientes <span class="text-secondary fw-normal">({{cantidadResultados}} resultados)</span></h2>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr>
+						<th scope="col">Alumno</th>
+						<th scope="col">Curso</th>
+						<th scope="col">Cuatrimestre</th>
+						<th scope="col">Cuotas pagadas</th>
+						<th scope="col">Cuotas pendientes</th>
+						<th scope="col">Saldo adeudado</th>
+						<th scope="col">Detalle y acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each cuentas}}
+					<tr>
+						<td><strong>{{this.apellido}}, {{this.nombre}}</strong><br><small class="text-secondary">DNI {{this.dni}}</small></td>
+						<td>{{this.curso}}</td>
+						<td>{{this.cuatrimestreEtiqueta}}</td>
+						<td>{{this.cuotasPagadas}} / {{this.cuotasTotal}}</td>
+						<td>{{this.cuotasPendientes}}</td>
+						<td class="fw-semibold">{{this.saldoAdeudadoFormato}}</td>
+						<td>
+							<details>
+								<summary>Ver cuotas ({{this.cuotas.length}})</summary>
+								<div class="table-responsive mt-2">
+									<table class="table table-sm table-bordered mb-2">
+										<thead><tr><th>Vencimiento</th><th>Importe</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead>
+										<tbody>
+											{{#each this.cuotas}}
+											<tr>
+												<td>{{this.mes}}</td>
+												<td>{{this.importeTotalFormato}}</td>
+												<td>{{this.importePagadoFormato}}</td>
+												<td>{{this.importePendienteFormato}}</td>
+												<td>{{this.estadoEtiqueta}}</td>
+											</tr>
+											{{else}}
+											<tr><td colspan="5" class="text-secondary">No hay cuotas para los filtros seleccionados.</td></tr>
+											{{/each}}
+										</tbody>
+									</table>
+								</div>
+							</details>
+							{{#if this.cuotasPendientes}}
+							<a class="btn btn-sm btn-outline-primary mt-2" href="/cuotas/registrar-pago?inscripcionId={{this.inscripcionId}}">Registrar pago</a>
+							{{/if}}
+						</td>
+					</tr>
+					{{else}}
+					<tr><td colspan="7" class="text-center text-secondary py-4">No se encontraron cuentas con esos filtros.</td></tr>
+					{{/each}}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</main>
+{{/layout}}

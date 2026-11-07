@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ProcesarPagosAlumnosModule } from './procesar-pagos-alumnos/procesar-pagos-alumnos.module.js';
@@ -10,12 +11,17 @@ import { InscribirAlumnoModule } from './inscribir-alumno/inscribir-alumno.modul
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ProcesarPagosAlumnosModule,
     AdministrarCursosModule,
-    InscribirAlumnoModule, 
-    DrizzleModule.forRoot({
-      drizzle,
-      connection: process.env.DATABASE_HOST!,
+    InscribirAlumnoModule,
+    DrizzleModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        drizzle,
+        connection: configService.getOrThrow<string>('DATABASE_URL'),
+      }),
     }),
     CoreModule,
   ],

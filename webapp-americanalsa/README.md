@@ -48,6 +48,20 @@
 $ npm install
 ```
 
+## Configuración local
+
+Copiá `.env.example` como `.env` y configurá `DATABASE_URL` con la URL de tu base PostgreSQL local. Si usás Docker Compose, la contraseña de la URL debe coincidir con la configurada para PostgreSQL. El archivo `.env` está excluido de Git; no guardes credenciales en `package.json`.
+
+En PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+## Zona horaria
+
+Los comandos `start`, `start:dev`, `start:debug` y `start:prod` fijan `TZ=America/Argentina/Tucuman` para que los cálculos de fechas locales sean consistentes entre la PC y el servidor. Para iniciar la aplicación en producción, usá `npm run start:prod` o configurá esa misma zona horaria en el entorno que ejecute `node dist/main`.
+
 ## Compile and run the project
 
 ```bash

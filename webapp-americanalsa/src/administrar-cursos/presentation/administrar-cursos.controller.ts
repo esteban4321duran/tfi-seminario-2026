@@ -1,11 +1,9 @@
 import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import dayjs from 'dayjs';
-import {
-	AdministrarCursosService, DIAS_SEMANA, normalizarDias,
-	type ResultadoCrearCurso,
-} from '../application/administrar-cursos.service.js';
-import type { CrearCursoDto } from '../application/administrar-cursos.service.js';
+import { AdministrarCursosService } from '../application/administrar-cursos.service.js';
+import { DIAS_SEMANA, normalizarDias } from '../domain/curso.domain.js';
+import type { CrearCursoDto, ResultadoCrearCurso } from '../application/curso.types.js';
 
 @Controller('administrar-cursos')
 export class AdministrarCursosController {
@@ -16,6 +14,7 @@ export class AdministrarCursosController {
 	async listado(@Query('creado') creado?: string) {
 		const cursos = await this.service.listar();
 		return {
+			esCursos: true,
 			creado: creado !== undefined,
 			cursos: cursos.map((c) => ({ ...c, esNuevo: String(c.id) === creado })),
 		};
@@ -41,6 +40,7 @@ export class AdministrarCursosController {
 		const diasElegidos = normalizarDias(valores.dias);
 		const anioActual = dayjs().year();
 		return {
+			esCursos: true,
 			instructoras: instructoras.map((i) => ({ ...i, seleccionada: String(i.id) === valores.instructoraId })),
 			dias: DIAS_SEMANA.map((d) => ({ ...d, marcado: diasElegidos.includes(d.valor) })),
 			cuatrimestres: [
