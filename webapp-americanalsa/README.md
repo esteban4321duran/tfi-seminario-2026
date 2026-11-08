@@ -62,6 +62,15 @@ Copy-Item .env.example .env
 
 Los comandos `start`, `start:dev`, `start:debug` y `start:prod` fijan `TZ=America/Argentina/Tucuman` para que los cálculos de fechas locales sean consistentes entre la PC y el servidor. Para iniciar la aplicación en producción, usá `npm run start:prod` o configurá esa misma zona horaria en el entorno que ejecute `node dist/main`.
 
+## Convenciones de arquitectura
+
+- Cada módulo (`administrar-cursos`, `inscribir-alumno` y `procesar-pagos-alumnos`) mantiene sus propias capas `presentation/`, `application/` y `persistence/`. Un módulo no importa archivos internos de otro; lo compartido se ubica en `core/`.
+- `presentation/` contiene los controladores y adapta las solicitudes y respuestas HTTP. Los servicios no dependen de Express ni de Handlebars.
+- `application/` contiene los servicios que coordinan los casos de uso y aplican las reglas de negocio. Los contratos, DTOs y tipos de resultados se definen en archivos `*.types.ts` separados.
+- `persistence/` contiene los repositorios y las consultas de Drizzle. Los repositorios entregan datos; el servicio transforma esos datos para la aplicación y la presentación.
+- Las operaciones que requieren consistencia —por ejemplo, registrar un pago verificando el saldo— mantienen la lectura, validación e inserción dentro de una transacción.
+- Para agregar o cambiar comportamientos, ejecutar `npm run lint`, `npm run build` y `npm test` desde `webapp-americanalsa/`.
+
 ## Compile and run the project
 
 ```bash

@@ -4,26 +4,7 @@ import 'dayjs/locale/es.js';
 import { etiquetaCuatrimestreFecha } from '../../core/application/cuatrimestre.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { InscribirAlumnoRepository } from '../persistence/inscribir-alumno.repository.js';
-
-export interface InscribirAlumnoDto {
-	apellido?: string;
-	nombre?: string;
-	planificacionCursoId?: string;
-	alumnoId?: string; // viene informado cuando el secretario eligió un alumno existente
-}
-
-export interface CuotaAdeudada {
-	curso: string;
-	mes: string;
-	pendiente: string;
-}
-
-export type ResultadoInscripcion =
-	| { ok: true; alumnoId: number; anio: number }
-	| { ok: false; tipo: 'faltan_datos'; faltantes: string[] }
-	| { ok: false; tipo: 'curso_no_disponible'; mensaje: string }
-	| { ok: false; tipo: 'adeuda_cuotas'; mensaje: string; cuotas: CuotaAdeudada[] }
-	| { ok: false; tipo: 'ya_cursando'; mensaje: string };
+import type { CuotaAdeudada, InscribirAlumnoDto, ResultadoInscripcion } from './inscribir-alumno.types.js';
 
 @Injectable()
 export class InscribirAlumnoService {

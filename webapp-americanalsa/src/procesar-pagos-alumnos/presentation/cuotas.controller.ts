@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import type { FiltrosCuotas } from '../application/cuotas.service.js';
+import type { FiltrosCuotas } from '../application/cuotas.types.js';
 import { CuotasService } from '../application/cuotas.service.js';
 
 function enteroPositivo(valor?: string): number | undefined {

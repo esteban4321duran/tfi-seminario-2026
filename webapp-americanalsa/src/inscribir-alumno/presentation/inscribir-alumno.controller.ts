@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common'
 import type { Response } from 'express';
 import dayjs from 'dayjs';
 import { InscribirAlumnoService } from '../application/inscribir-alumno.service.js';
-import type { InscribirAlumnoDto, ResultadoInscripcion } from '../application/inscribir-alumno.service.js';
+import type { InscribirAlumnoDto, ResultadoInscripcion } from '../application/inscribir-alumno.types.js';
 
 @Controller('inscribir-alumno')
 export class InscribirAlumnoController {
