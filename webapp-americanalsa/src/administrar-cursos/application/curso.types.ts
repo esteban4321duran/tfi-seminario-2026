@@ -24,4 +24,5 @@ export interface CursoListado {
 	instructora: string | null;
 	horarios: string[];
 	cantidadClases: number;
+	cantidadAlumnos: number;
 }

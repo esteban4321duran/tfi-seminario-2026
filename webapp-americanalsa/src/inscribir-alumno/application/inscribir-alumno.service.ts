@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es.js';
 import { etiquetaCuatrimestreFecha } from '../../core/application/cuatrimestre.js';
+import { calcularFechaCorteCuotas } from '../../core/application/cuotas.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { InscribirAlumnoRepository } from '../persistence/inscribir-alumno.repository.js';
 import type { CuotaAdeudada, InscribirAlumnoDto, ResultadoInscripcion } from './inscribir-alumno.types.js';
@@ -67,7 +68,8 @@ export class InscribirAlumnoService {
 	}
 
 	private async getCuotasAdeudadas(alumnoId: number): Promise<CuotaAdeudada[]> {
-		const filas = await this.repository.getCuotasAdeudadas(alumnoId);
+		const fechaCorte = calcularFechaCorteCuotas(new Date());
+		const filas = await this.repository.getCuotasAdeudadas(alumnoId, fechaCorte);
 		const formatoMoneda = this.formatoMonedaService.getFormateador();
 		return filas.map((f) => ({
 			curso: f.curso,

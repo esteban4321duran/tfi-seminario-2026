@@ -9,6 +9,8 @@ export const DIAS_SEMANA = [
 
 export type DiaSemana = (typeof DIAS_SEMANA)[number]['valor'];
 
+export const ROL_INSTRUCTOR = 'instructor' as const;
+
 export function normalizarDias(dias?: string | string[]): DiaSemana[] {
 	const lista = dias === undefined ? [] : Array.isArray(dias) ? dias : [dias];
 	return DIAS_SEMANA.map((d) => d.valor).filter((d) => lista.includes(d));

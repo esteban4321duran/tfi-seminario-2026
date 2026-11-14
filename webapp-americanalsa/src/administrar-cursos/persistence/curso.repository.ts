@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import {
   DIAS_SEMANA,
+  ROL_INSTRUCTOR,
   type DiaSemana,
 } from '../domain/curso.domain.js';
 import {
@@ -12,6 +13,7 @@ import {
   cursoTable,
   empleadoTable,
   horarioCursoTable,
+  inscripcionAlumnoTable,
   matriculaTable,
   planificacionCursoTable,
 } from '../../core/persistence/schema.js';
@@ -23,6 +25,7 @@ export interface CursoListadoPersistido {
   instructoraNombre: string | null;
   instructoraApellido: string | null;
   cantidadClases: number;
+  cantidadAlumnos: number;
   horarios: Array<{
     diaSemana: DiaSemana;
     horaInicio: string;
@@ -89,7 +92,7 @@ export class CursoRepository {
     fechaInicio: Date;
     fechaFin: Date;
     cuotas: Date[];
-    rol: 'instructor';
+    rol: typeof ROL_INSTRUCTOR;
   }): Promise<ResultadoCreacion> {
     const { nombre, instructoraId, dias, horaInicio, duracionMinutos, cantidadClases, precioCuota, precioMatricula, fechaInicio, fechaFin, cuotas, rol } = params;
 
@@ -158,7 +161,7 @@ export class CursoRepository {
       .innerJoin(cursoTable, eq(cursoTable.id, planificacionCursoTable.cursoId))
       .leftJoin(asignacionCursoTable, and(
         eq(asignacionCursoTable.planificacionCursoId, planificacionCursoTable.id),
-        eq(asignacionCursoTable.rol, 'instructor'),
+        eq(asignacionCursoTable.rol, ROL_INSTRUCTOR),
         isNull(asignacionCursoTable.borradoEn),
       ))
       .leftJoin(empleadoTable, eq(empleadoTable.id, asignacionCursoTable.empleadoId))
@@ -168,6 +171,19 @@ export class CursoRepository {
     const ids = filas.map((f) => f.id);
     const horarios = ids.length === 0 ? [] : await this.db.select().from(horarioCursoTable)
       .where(and(inArray(horarioCursoTable.planificacionCursoId, ids), isNull(horarioCursoTable.borradoEn)));
+    const inscripciones = ids.length === 0 ? [] : await this.db.select({
+      planificacionCursoId: inscripcionAlumnoTable.planificacionCursoId,
+      cantidadAlumnos: count(inscripcionAlumnoTable.id),
+    })
+      .from(inscripcionAlumnoTable)
+      .where(and(
+        inArray(inscripcionAlumnoTable.planificacionCursoId, ids),
+        isNull(inscripcionAlumnoTable.borradoEn),
+      ))
+      .groupBy(inscripcionAlumnoTable.planificacionCursoId);
+    const alumnosPorPlanificacion = new Map(
+      inscripciones.map(({ planificacionCursoId, cantidadAlumnos }) => [planificacionCursoId, cantidadAlumnos]),
+    );
 
     const orden = DIAS_SEMANA.map((d) => d.valor as string);
     return filas.map((f) => ({
@@ -177,6 +193,7 @@ export class CursoRepository {
       instructoraNombre: f.instructoraNombre,
       instructoraApellido: f.instructoraApellido,
       cantidadClases: f.cantidadClases,
+      cantidadAlumnos: alumnosPorPlanificacion.get(f.id) ?? 0,
       horarios: horarios
         .filter((h) => h.planificacionCursoId === f.id)
         .sort((a, b) => orden.indexOf(a.diaSemana) - orden.indexOf(b.diaSemana))

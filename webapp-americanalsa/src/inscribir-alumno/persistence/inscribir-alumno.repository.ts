@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, desc, eq, gte, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
 import {
   alumnoTable,
   cuotaTable,
@@ -134,7 +134,7 @@ export class InscribirAlumnoRepository {
     });
   }
 
-  async getCuotasAdeudadas(alumnoId: number): Promise<CuotaAdeudadaRow[]> {
+  async getCuotasAdeudadas(alumnoId: number, fechaCorte: Date): Promise<CuotaAdeudadaRow[]> {
     const filas = await this.db.select({
       curso: cursoTable.nombre,
       mes: cuotaTable.mes,
@@ -152,7 +152,7 @@ export class InscribirAlumnoRepository {
       .where(and(
         eq(inscripcionAlumnoTable.alumnoId, alumnoId),
         isNull(inscripcionAlumnoTable.borradoEn),
-        sql`${cuotaTable.mes} <= current_date`,
+        lte(cuotaTable.mes, fechaCorte),
       ))
       .groupBy(inscripcionAlumnoTable.id, cuotaTable.id, cuotaTable.mes, cursoTable.nombre, planificacionCursoTable.precioCuota)
       .having(sql`coalesce(sum(${pagoCuotaAlumnoTable.monto}), 0) < ${planificacionCursoTable.precioCuota}`)

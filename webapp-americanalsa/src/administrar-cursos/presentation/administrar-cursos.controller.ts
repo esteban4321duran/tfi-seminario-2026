@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common'
 import type { Response } from 'express';
 import dayjs from 'dayjs';
 import { AdministrarCursosService } from '../application/administrar-cursos.service.js';
+import { etiquetaCuatrimestreConMeses } from '../../core/application/cuatrimestre.js';
 import { DIAS_SEMANA, normalizarDias } from '../domain/curso.domain.js';
 import type { CrearCursoDto, ResultadoCrearCurso } from '../application/curso.types.js';
 
@@ -43,10 +44,11 @@ export class AdministrarCursosController {
 			esCursos: true,
 			instructoras: instructoras.map((i) => ({ ...i, seleccionada: String(i.id) === valores.instructoraId })),
 			dias: DIAS_SEMANA.map((d) => ({ ...d, marcado: diasElegidos.includes(d.valor) })),
-			cuatrimestres: [
-				{ valor: 1, etiqueta: '1er cuatrimestre (marzo - junio)', seleccionado: valores.cuatrimestre === '1' },
-				{ valor: 2, etiqueta: '2do cuatrimestre (agosto - noviembre)', seleccionado: valores.cuatrimestre === '2' },
-			],
+			cuatrimestres: ([1, 2] as const).map((valor) => ({
+				valor,
+				etiqueta: etiquetaCuatrimestreConMeses(valor),
+				seleccionado: valores.cuatrimestre === String(valor),
+			})),
 			valores: {
 				nombre: valores.nombre ?? '',
 				anio: valores.anio ?? anioActual,

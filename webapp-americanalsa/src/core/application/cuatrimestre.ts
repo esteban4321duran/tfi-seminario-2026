@@ -5,6 +5,11 @@ export const CUATRIMESTRES: Record<Cuatrimestre, { mesInicio: number; mesFin: nu
 	2: { mesInicio: 7, mesFin: 10 },
 };
 
+const NOMBRES_MESES = [
+	'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+	'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
 export function esCuatrimestre(value: number): value is Cuatrimestre {
 	return value === 1 || value === 2;
 }
@@ -15,6 +20,11 @@ export function cuatrimestreDeFecha(fecha: Date): Cuatrimestre {
 
 export function etiquetaCuatrimestre(cuatrimestre: Cuatrimestre): string {
 	return cuatrimestre === 1 ? '1er' : '2do';
+}
+
+export function etiquetaCuatrimestreConMeses(cuatrimestre: Cuatrimestre): string {
+	const { mesInicio, mesFin } = CUATRIMESTRES[cuatrimestre];
+	return `${etiquetaCuatrimestre(cuatrimestre)} cuatrimestre (${NOMBRES_MESES[mesInicio]} - ${NOMBRES_MESES[mesFin]})`;
 }
 
 export function etiquetaCuatrimestreFecha(fecha: Date): string {

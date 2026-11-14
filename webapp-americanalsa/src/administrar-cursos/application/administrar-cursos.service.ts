@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CUATRIMESTRES, calcularFechasCuatrimestre, cuatrimestreDeFecha, esCuatrimestre, etiquetaCuatrimestre, type Cuatrimestre } from '../../core/application/cuatrimestre.js';
-import { DIAS_SEMANA, normalizarDias, type DiaSemana } from '../domain/curso.domain.js';
+import { DIAS_SEMANA, normalizarDias, ROL_INSTRUCTOR, type DiaSemana } from '../domain/curso.domain.js';
 import { CursoRepository } from '../persistence/curso.repository.js';
 import type { CrearCursoDto, CursoListado, ResultadoCrearCurso } from './curso.types.js';
 
@@ -121,7 +121,7 @@ export class AdministrarCursosService {
 			fechaInicio,
 			fechaFin,
 			cuotas,
-			rol: 'instructor',
+			rol: ROL_INSTRUCTOR,
 		});
 
 		if (!resultado.creado) {
@@ -144,6 +144,7 @@ export class AdministrarCursosService {
 			anio: curso.fechaInicio.getFullYear(),
 			instructora: curso.instructoraApellido ? `${curso.instructoraApellido}, ${curso.instructoraNombre}` : null,
 			cantidadClases: curso.cantidadClases,
+			cantidadAlumnos: curso.cantidadAlumnos,
 			horarios: curso.horarios.map((horario) => {
 				const dia = DIAS_SEMANA.find((d) => d.valor === horario.diaSemana);
 				return `${dia?.etiqueta ?? horario.diaSemana} ${horario.horaInicio.slice(0, 5)} (${horario.duracionMinutos} min)`;

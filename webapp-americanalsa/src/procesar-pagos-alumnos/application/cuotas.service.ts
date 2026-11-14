@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { cuatrimestreDeFecha, etiquetaCuatrimestre } from '../../core/application/cuatrimestre.js';
+import { calcularFechaCorteCuotas, cuotaVencida } from '../../core/application/cuotas.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { CuotaRepository, type FilaListadoCuotas } from '../persistence/cuota.repository.js';
 import type { CuentaCuotas, EstadoCuota, FiltrosCuotas, OrdenCuotas } from './cuotas.types.js';
@@ -11,12 +12,6 @@ const MESES = [
 
 function claveMes(fecha: Date): string {
 	return fecha.toISOString().slice(0, 7);
-}
-
-function claveMesLocal(fecha: Date): string {
-	const anio = fecha.getFullYear();
-	const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-	return `${anio}-${mes}`;
 }
 
 function formatoMes(fecha: Date): string {
@@ -43,7 +38,7 @@ export class CuotasService {
 		private readonly formatoMonedaService: FormatoMonedaService,
 	) { }
 
-	private agruparCuentas(filas: FilaListadoCuotas[], formatoDinero: Intl.NumberFormat, hoy: string): CuentaCuotas[] {
+	private agruparCuentas(filas: FilaListadoCuotas[], formatoDinero: Intl.NumberFormat, fechaCorte: Date): CuentaCuotas[] {
 		const cuentasPorInscripcion = new Map<number, CuentaCuotas>();
 		for (const fila of filas) {
 			const anio = fila.fechaInicio.getFullYear();
@@ -95,7 +90,7 @@ export class CuotasService {
 			cuenta.cuotasTotal++;
 			if (estado === 'pagada') cuenta.cuotasPagadas++;
 			else cuenta.cuotasPendientes++;
-			if (mesKey <= hoy) cuenta.saldoAdeudado += importePendiente;
+			if (cuotaVencida(fila.mes, fechaCorte)) cuenta.saldoAdeudado += importePendiente;
 		}
 
 		const todasLasCuentas = Array.from(cuentasPorInscripcion.values());
@@ -193,7 +188,7 @@ export class CuotasService {
 		const cuentas = this.agruparCuentas(
 			filas,
 			this.formatoMonedaService.getFormateador(),
-			claveMesLocal(new Date()),
+			calcularFechaCorteCuotas(new Date()),
 		);
 		const cuentasFiltradas = this.ordenar(this.aplicarFiltros(cuentas, filtros), filtros.orden);
 
