@@ -20,27 +20,28 @@ function crearCuotasDelCuatrimestre(anio: number, cuatrimestre: Cuatrimestre) {
 	return cuotas;
 }
 
+type ValidacionDatos =
+	| { ok: true; datos: {
+			nombre: string;
+			instructoraId: number;
+			dias: DiaSemana[];
+			horaInicio: string;
+			duracionMinutos: number;
+			cantidadClases: number;
+			anio: number;
+			cuatrimestre: Cuatrimestre;
+			precioCuota: number;
+			precioMatricula: number;
+		} }
+	| { ok: false; tipo: 'faltan_datos'; faltantes: string[] };
+
 @Injectable()
 export class AdministrarCursosService {
 	constructor(
 		private readonly repository: CursoRepository,
 	) { }
 
-	private async validarDatos(dto: CrearCursoDto): Promise<
-		| { ok: true; datos: {
-				nombre: string;
-				instructoraId: number;
-				dias: DiaSemana[];
-				horaInicio: string;
-				duracionMinutos: number;
-				cantidadClases: number;
-				anio: number;
-				cuatrimestre: Cuatrimestre;
-				precioCuota: number;
-				precioMatricula: number;
-			} }
-		| { ok: false; tipo: 'faltan_datos'; faltantes: string[] }
-	> {
+	private validarDatos(dto: CrearCursoDto): ValidacionDatos {
 		const faltantes: string[] = [];
 
 		const nombre = (dto.nombre ?? '').trim();
@@ -48,8 +49,6 @@ export class AdministrarCursosService {
 
 		const instructoraId = Number(dto.instructoraId);
 		if (!Number.isInteger(instructoraId) || instructoraId <= 0) {
-			faltantes.push('Instructora');
-		} else if (!(await this.repository.existeInstructora(instructoraId))) {
 			faltantes.push('Instructora');
 		}
 
@@ -104,9 +103,13 @@ export class AdministrarCursosService {
 	}
 
 	async crear(dto: CrearCursoDto): Promise<ResultadoCrearCurso> {
-		const validacion = await this.validarDatos(dto);
+		const validacion = this.validarDatos(dto);
 		if (!validacion.ok) {
 			return validacion;
+		}
+
+		if (!(await this.repository.existeInstructora(validacion.datos.instructoraId))) {
+			return { ok: false, tipo: 'faltan_datos', faltantes: ['Instructora'] };
 		}
 
 		const { nombre, anio, cuatrimestre, ...datosPlanificacion } = validacion.datos;
@@ -117,7 +120,7 @@ export class AdministrarCursosService {
 			nombre,
 			fechaInicio,
 			fechaFin,
-			cuotas: cuotas.map((mes) => ({ mes })),
+			cuotas,
 			rol: 'instructor',
 		});
 

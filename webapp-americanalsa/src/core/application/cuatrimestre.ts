@@ -10,7 +10,7 @@ export function esCuatrimestre(value: number): value is Cuatrimestre {
 }
 
 export function cuatrimestreDeFecha(fecha: Date): Cuatrimestre {
-	return fecha.getMonth() <= 5 ? 1 : 2;
+	return fecha.getMonth() <= CUATRIMESTRES[1].mesFin ? 1 : 2;
 }
 
 export function etiquetaCuatrimestre(cuatrimestre: Cuatrimestre): string {

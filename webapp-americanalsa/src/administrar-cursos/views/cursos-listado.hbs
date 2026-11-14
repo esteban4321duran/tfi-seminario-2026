@@ -140,71 +140,12 @@
     font-weight: 400;
   }
 
-  .quick-form-panel {
-    margin-top: 16px;
-    padding: 18px;
-  }
-
-  .quick-form-panel h3 {
-    margin: 0 0 14px;
-    font-size: 15px;
-    color: #18304c;
-    font-weight: 800;
-  }
-
-  .field-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px 18px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .field label {
-    color: #344c67;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .field input,
-  .field select {
-    height: 41px;
-    border: 1px solid #d7e1eb;
-    border-radius: 7px;
-    background: #fff;
-    padding: 0 12px;
-    font-size: 13px;
-    color: #294361;
-    outline: none;
-  }
-
-  .field input:focus,
-  .field select:focus {
-    border-color: #3987d5;
-    box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
-  }
-
-  .submit-row {
-    margin-top: 16px;
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .submit-row .btn-primary-soft {
-    min-width: 0;
-  }
-
   @media (max-width: 900px) {
     .page-shell {
       padding: 4px 0 16px;
     }
 
-    .hero-row,
-    .field-grid {
+    .hero-row {
       grid-template-columns: 1fr;
       display: grid;
     }
@@ -267,34 +208,5 @@
     </div>
   </section>
 
-  <section class="panel quick-form-panel">
-    <h3>Alta rápida de curso</h3>
-
-    <div class="field-grid">
-      <div class="field">
-        <label for="nombre">Nombre del curso</label>
-        <input id="nombre" type="text" placeholder="Ej. Inglés para adultos" />
-      </div>
-
-      <div class="field">
-        <label for="nivel">Nivel</label>
-        <select id="nivel">
-          <option>A1</option>
-          <option>A2</option>
-          <option>B1</option>
-          <option>B2</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="docente">Docente</label>
-        <input id="docente" type="text" placeholder="Nombre del docente" />
-      </div>
-    </div>
-
-    <div class="submit-row">
-      <button type="button" class="btn btn-primary-soft">Guardar curso</button>
-    </div>
-  </section>
 </div>
 {{/layout}}

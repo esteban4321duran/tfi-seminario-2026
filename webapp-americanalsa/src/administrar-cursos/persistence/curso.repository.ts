@@ -30,7 +30,7 @@ export interface CursoListadoPersistido {
   }>;
 }
 
-type ResultadoCreacion =
+export type ResultadoCreacion =
   | { creado: true; planificacionId: number }
   | { creado: false; motivo: 'planificacion_duplicada' };
 
@@ -80,7 +80,7 @@ export class CursoRepository {
   async crearCursoCompleto(params: {
     nombre: string;
     instructoraId: number;
-    dias: readonly ((typeof DIAS_SEMANA)[number]['valor'])[];
+    dias: readonly DiaSemana[];
     horaInicio: string;
     duracionMinutos: number;
     cantidadClases: number;
@@ -88,7 +88,7 @@ export class CursoRepository {
     precioMatricula: number;
     fechaInicio: Date;
     fechaFin: Date;
-    cuotas: Array<{ mes: Date }>;
+    cuotas: Date[];
     rol: 'instructor';
   }): Promise<ResultadoCreacion> {
     const { nombre, instructoraId, dias, horaInicio, duracionMinutos, cantidadClases, precioCuota, precioMatricula, fechaInicio, fechaFin, cuotas, rol } = params;
@@ -138,7 +138,7 @@ export class CursoRepository {
       await tx.insert(matriculaTable).values({ planificacionCursoId: planificacion.id });
 
       await tx.insert(cuotaTable).values(
-        cuotas.map(({ mes }) => ({ planificacionCursoId: planificacion.id, mes })),
+        cuotas.map((mes) => ({ planificacionCursoId: planificacion.id, mes })),
       );
 
       return { creado: true, planificacionId: planificacion.id };
