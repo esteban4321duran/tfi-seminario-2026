@@ -137,7 +137,8 @@ export class AdministrarCursosService {
 		return cursos.map((curso) => ({
 			id: curso.id,
 			nombre: curso.nombre,
-			cuatrimestre: `${etiquetaCuatrimestre(cuatrimestreDeFecha(curso.fechaInicio))} cuatrimestre ${curso.fechaInicio.getFullYear()}`,
+			cuatrimestre: `${etiquetaCuatrimestre(cuatrimestreDeFecha(curso.fechaInicio))} cuatrimestre`,
+			anio: curso.fechaInicio.getFullYear(),
 			instructora: curso.instructoraApellido ? `${curso.instructoraApellido}, ${curso.instructoraNombre}` : null,
 			cantidadClases: curso.cantidadClases,
 			horarios: curso.horarios.map((horario) => {

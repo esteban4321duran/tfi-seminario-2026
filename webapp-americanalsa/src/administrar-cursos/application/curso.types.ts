@@ -20,6 +20,7 @@ export interface CursoListado {
 	id: number;
 	nombre: string;
 	cuatrimestre: string;
+	anio: number;
 	instructora: string | null;
 	horarios: string[];
 	cantidadClases: number;

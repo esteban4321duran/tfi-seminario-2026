@@ -39,33 +39,66 @@ describe('AppController (e2e)', () => {
       .get('/cuotas?estado=pendiente')
       .expect(200)
       .expect(/Búsqueda de cuentas corrientes/)
-      .expect(/Cuentas corrientes/);
+      .expect(/Cuentas corrientes/)
+      .expect(/id="cuotasPagoModal"/)
+      .expect(/data-bs-target="#cuotasPagoModal"/);
   });
 
-  it('/cuotas/registrar-pago (GET) renders the payment form', () => {
+  it('/cuotas/opciones-pago (GET) returns pending installment options as JSON', () => {
+    return request(app.getHttpServer())
+      .get('/cuotas/opciones-pago?inscripcionId=1')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .expect((response) => {
+        expect(Array.isArray(response.body)).toBe(true);
+        if (response.body.length) {
+          expect(response.body[0]).toHaveProperty('cuotaKey');
+          expect(response.body[0]).toHaveProperty('etiqueta');
+        }
+      });
+  });
+
+  it('/cuotas/opciones-pago (GET) rejects an invalid enrollment id', () => {
+    return request(app.getHttpServer())
+      .get('/cuotas/opciones-pago?inscripcionId=invalid')
+      .expect(400);
+  });
+
+  it('/cuotas/registrar-pago (GET) no longer serves a standalone form', () => {
     return request(app.getHttpServer())
       .get('/cuotas/registrar-pago')
-      .expect(200)
-      .expect(/Registrar pago/)
-      .expect(/Importe recibido/);
+      .expect(404);
   });
 
   it('/cuotas/registrar-pago (POST) rejects a missing installment', () => {
     return request(app.getHttpServer())
       .post('/cuotas/registrar-pago')
+      .set('Accept', 'application/json')
       .type('form')
       .send({})
       .expect(400)
-      .expect(/Seleccioná una cuota válida/);
+      .expect({ mensajeError: 'Seleccioná una cuota válida.' });
+  });
+
+  it('/cuotas/registrar-pago (POST) returns validation errors as JSON for the modal', () => {
+    return request(app.getHttpServer())
+      .post('/cuotas/registrar-pago')
+      .set('Accept', 'application/json')
+      .type('form')
+      .send({})
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .expect({ mensajeError: 'Seleccioná una cuota válida.' });
   });
 
   it('/cuotas/registrar-pago (POST) rejects amounts with more than two decimals', () => {
     return request(app.getHttpServer())
       .post('/cuotas/registrar-pago')
+      .set('Accept', 'application/json')
       .type('form')
       .send({ cuotaKey: '1:1', monto: '1.234' })
       .expect(400)
-      .expect(/hasta dos decimales/);
+      .expect({ mensajeError: 'Ingresá un importe válido mayor a cero, con hasta dos decimales.' });
   });
 
   it('/administrar-cursos (POST) requires both prices', () => {

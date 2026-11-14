@@ -1,65 +1,234 @@
 {{#> layout esCuotas=true}}
-<main class="container-fluid py-3">
-	<header class="d-flex justify-content-between align-items-start gap-3 mb-3">
+<style>
+	.cuotas-page,
+	.cuotas-page * {
+		font-family: "Segoe UI", Tahoma, sans-serif;
+	}
+
+	.cuotas-page {
+		color: #18304c;
+		padding: 10px 8px 22px;
+	}
+
+	.cuotas-heading {
+		margin: 8px 0 20px;
+	}
+
+	.cuotas-eyebrow {
+		color: #176fbd;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		margin-bottom: 8px;
+		text-transform: uppercase;
+	}
+
+	.cuotas-heading h1 {
+		color: #17314f;
+		font-size: 28px;
+		font-weight: 800;
+		margin: 0 0 6px;
+	}
+
+	.cuotas-heading p {
+		color: #6b7f96;
+		margin: 0;
+	}
+
+	.cuotas-panel {
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+	}
+
+	.cuotas-filters {
+		background: #fff;
+		box-shadow: 0 2px 10px rgba(23, 49, 79, .07);
+	}
+
+	.cuotas-filters-heading {
+		border-bottom: 1px solid #e8edf2;
+		margin-bottom: 18px;
+		padding-bottom: 12px;
+	}
+
+	.cuotas-filters h2 {
+		color: #18304c;
+		font-size: 15px;
+		font-weight: 800;
+	}
+
+	.cuotas-filters p {
+		color: #6b7f96;
+		font-size: 13px;
+	}
+
+	.cuotas-page .form-label {
+		color: #344c67;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.cuotas-page .form-control,
+	.cuotas-page .form-select {
+		border-color: #d7e1eb;
+		border-radius: 7px;
+		color: #294361;
+		font-size: 13px;
+		min-height: 41px;
+	}
+
+	.cuotas-page .form-control:focus,
+	.cuotas-page .form-select:focus {
+		border-color: #3987d5;
+		box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+	}
+
+	.cuotas-page .form-check-label,
+	.cuotas-page .btn {
+		font-size: 13px;
+	}
+
+	.cuotas-page .btn-primary {
+		background: #287bd0;
+		border: 0;
+		border-radius: 7px;
+		color: #fff;
+		font-weight: 700;
+		padding: 10px 16px;
+	}
+
+	.cuotas-page .btn-primary:hover {
+		background: #1d69b7;
+		color: #fff;
+	}
+
+	.cuotas-results th {
+		background: #f7f9fb;
+		color: #72849a;
+		font-size: 11px;
+		font-weight: 800;
+		padding: 12px 16px;
+		text-transform: uppercase;
+	}
+
+	.cuotas-results {
+		background: #fff;
+		box-shadow: 0 2px 10px rgba(23, 49, 79, .07);
+		overflow: hidden;
+	}
+
+	.cuotas-results .card-header {
+		border-bottom: 1px solid #e8edf2;
+		padding: 18px 18px 12px;
+	}
+
+	.cuotas-results td {
+		color: #294361;
+		font-size: 13px;
+	}
+
+	.cuotas-results h2 {
+		color: #18304c;
+		font-size: 15px;
+		font-weight: 800;
+	}
+
+	.cuotas-results h2 span {
+		color: #6b7f96;
+		font-weight: 400;
+	}
+
+	.cuotas-results details summary {
+		color: #287bd0;
+		cursor: pointer;
+		font-weight: 700;
+	}
+
+	.cuotas-payment-modal .modal-content {
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+	}
+
+	.cuotas-payment-modal .modal-title {
+		color: #17314f;
+		font-size: 18px;
+		font-weight: 800;
+	}
+
+	.cuotas-payment-modal .modal-body {
+		color: #18304c;
+	}
+
+	@media (max-width: 700px) {
+		.cuotas-page {
+			padding: 4px 0 16px;
+		}
+	}
+</style>
+
+<main class="cuotas-page container-fluid py-3">
+	<header class="cuotas-heading d-flex justify-content-between align-items-start gap-3">
 		<div>
-			<p class="text-uppercase text-secondary small fw-bold mb-1">Administración financiera</p>
-			<h1 class="h3 mb-1 fw-bold" style="color: #17314f;">Cuotas</h1>
-			<p class="text-secondary mb-0">Consultá las cuentas corrientes y registrá pagos de los alumnos.</p>
+			<div class="cuotas-eyebrow">Administración financiera</div>
+			<h1>Cuotas</h1>
+			<p>Consultá las cuentas corrientes y registrá pagos de los alumnos.</p>
 		</div>
-		<a class="btn btn-primary" href="/cuotas/registrar-pago">Registrar pago</a>
 	</header>
 
 	{{#if pagoRegistrado}}
 	<div class="alert alert-success" role="status">El pago se registró correctamente.</div>
 	{{/if}}
 
-	<section class="card mb-3">
+	<section class="cuotas-panel cuotas-filters card mb-3">
 		<div class="card-body">
-			<h2 class="h6 mb-3">Búsqueda de cuentas corrientes</h2>
+			<div class="cuotas-filters-heading">
+				<h2 class="h6 mb-1">Búsqueda de cuentas corrientes</h2>
+				<p class="mb-0">Filtrá por alumno, curso, período y estado de las cuotas.</p>
+			</div>
 			<form method="get" action="/cuotas">
 				{{#if filtros.alumnoId}}<input type="hidden" name="alumnoId" value="{{filtros.alumnoId}}">{{/if}}
 				<div class="row g-3">
-					<div class="col-12 col-md-6 col-xl-3">
+					<div class="col-12 col-xl-6">
 						<label class="form-label" for="buscar">Buscar alumno</label>
 						<input class="form-control" type="search" id="buscar" name="buscar" value="{{filtros.buscar}}" placeholder="Apellido, nombre o DNI">
 					</div>
-					<div class="col-12 col-md-6 col-xl-3">
+					<div class="col-12 col-xl-6">
 						<label class="form-label" for="cursoId">Curso</label>
 						<select class="form-select" id="cursoId" name="cursoId">
 							{{#each cursos}}<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
 						</select>
 					</div>
-					<div class="col-6 col-md-4 col-xl-2">
+					<div class="col-6 col-xl-3">
 						<label class="form-label" for="anio">Año</label>
 						<select class="form-select" id="anio" name="anio">
 							{{#each anios}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
 						</select>
 					</div>
-					<div class="col-6 col-md-4 col-xl-2">
+					<div class="col-6 col-xl-3">
 						<label class="form-label" for="cuatrimestre">Cuatrimestre</label>
 						<select class="form-select" id="cuatrimestre" name="cuatrimestre">
 							{{#each cuatrimestres}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
 						</select>
 					</div>
-					<div class="col-6 col-md-4 col-xl-2">
+					<div class="col-6 col-xl-3">
 						<label class="form-label" for="estado">Estado de cuota</label>
 						<select class="form-select" id="estado" name="estado">
 							{{#each estados}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
 						</select>
 					</div>
-					<div class="col-6 col-md-4 col-xl-2">
+					<div class="col-6 col-xl-3">
 						<label class="form-label" for="mes">Mes de vencimiento</label>
 						<select class="form-select" id="mes" name="mes">
 							{{#each meses}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.nombre}}</option>{{/each}}
 						</select>
 					</div>
-					<div class="col-12 col-md-8 col-xl-6 d-flex flex-wrap align-items-end gap-3">
+					<div class="col-12 col-xl-5 d-flex flex-wrap align-items-end gap-3">
 						<div class="form-check mb-2">
 							<input class="form-check-input" type="checkbox" id="soloConDeuda" name="soloConDeuda" value="on" {{#if filtros.soloConDeuda}}checked{{/if}}>
 							<label class="form-check-label" for="soloConDeuda">Solo cuentas con saldo vencido</label>
 						</div>
 					</div>
-					<div class="col-12 col-md-8 col-xl-6 d-flex flex-wrap align-items-end justify-content-md-end gap-2">
+					<div class="col-12 col-xl-7 d-flex flex-wrap align-items-end justify-content-xl-end gap-2">
 						<label class="form-label mb-0" for="orden">Ordenar por</label>
 						<select class="form-select w-auto" id="orden" name="orden">
 							{{#each ordenes}}<option value="{{this.valor}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>{{/each}}
@@ -72,9 +241,9 @@
 		</div>
 	</section>
 
-	<section class="card">
+	<section class="cuotas-panel cuotas-results card">
 		<div class="card-header bg-white">
-			<h2 class="h6 mb-0">Cuentas corrientes <span class="text-secondary fw-normal">({{cantidadResultados}} resultados)</span></h2>
+			<h2 class="h6 mb-0">Cuentas corrientes <span>({{cantidadResultados}} resultados)</span></h2>
 		</div>
 		<div class="table-responsive">
 			<table class="table table-hover align-middle mb-0">
@@ -121,7 +290,7 @@
 								</div>
 							</details>
 							{{#if this.cuotasPendientes}}
-							<a class="btn btn-sm btn-outline-primary mt-2" href="/cuotas/registrar-pago?inscripcionId={{this.inscripcionId}}">Registrar pago</a>
+							<button class="btn btn-sm btn-outline-primary mt-2" type="button" data-bs-toggle="modal" data-bs-target="#cuotasPagoModal" data-inscripcion-id="{{this.inscripcionId}}">Registrar pago</button>
 							{{/if}}
 						</td>
 					</tr>
@@ -133,4 +302,118 @@
 		</div>
 	</section>
 </main>
+
+<div class="modal fade cuotas-payment-modal" id="cuotasPagoModal" tabindex="-1" aria-labelledby="cuotasPagoModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title" id="cuotasPagoModalLabel">Registrar pago</h2>
+				<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+			</div>
+			<div class="modal-body">
+				<div class="alert d-none" id="cuotasPagoMensaje" role="alert"></div>
+				<form id="cuotasPagoForm" method="post" action="/cuotas/registrar-pago">
+					<div class="mb-3">
+						<label class="form-label" for="cuotasPagoCuota">Alumno y cuota</label>
+						<select class="form-select" id="cuotasPagoCuota" name="cuotaKey" required disabled>
+							<option value="">Cargando cuotas...</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label" for="cuotasPagoMonto">Importe recibido</label>
+						<input class="form-control" type="number" id="cuotasPagoMonto" name="monto" min="0.01" step="0.01" required disabled>
+						<div class="form-text">El importe no puede superar el saldo pendiente de la cuota seleccionada.</div>
+					</div>
+					<div class="d-flex gap-2">
+						<button class="btn btn-primary" id="cuotasPagoGuardar" type="submit" disabled>Guardar pago</button>
+						<button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	(() => {
+		const modal = document.getElementById('cuotasPagoModal');
+		const form = document.getElementById('cuotasPagoForm');
+		const cuota = document.getElementById('cuotasPagoCuota');
+		const monto = document.getElementById('cuotasPagoMonto');
+		const guardar = document.getElementById('cuotasPagoGuardar');
+		const mensaje = document.getElementById('cuotasPagoMensaje');
+		let solicitud = 0;
+
+		const mostrarMensaje = (texto, tipo = 'danger') => {
+			mensaje.className = `alert alert-${tipo}`;
+			mensaje.textContent = texto;
+		};
+
+		modal.addEventListener('show.bs.modal', async (event) => {
+			const idSolicitud = ++solicitud;
+			const inscripcionId = event.relatedTarget?.dataset.inscripcionId;
+			mensaje.className = 'alert d-none';
+			form.reset();
+			cuota.disabled = true;
+			monto.disabled = true;
+			guardar.disabled = true;
+			cuota.replaceChildren(new Option('Cargando cuotas...', ''));
+
+			try {
+				const url = new URL('/cuotas/opciones-pago', window.location.origin);
+				if (inscripcionId) url.searchParams.set('inscripcionId', inscripcionId);
+				const response = await fetch(url);
+				if (!response.ok) throw new Error('No se pudieron cargar las cuotas pendientes.');
+				const opciones = await response.json();
+				if (idSolicitud !== solicitud) return;
+
+				cuota.replaceChildren(new Option(
+					opciones.length ? 'Seleccioná una cuota...' : 'No hay cuotas pendientes',
+					'',
+				));
+				opciones.forEach((opcion) => cuota.add(new Option(opcion.etiqueta, opcion.cuotaKey)));
+				cuota.disabled = opciones.length === 0;
+				monto.disabled = opciones.length === 0;
+				guardar.disabled = opciones.length === 0;
+				if (!opciones.length) mostrarMensaje('No hay cuotas pendientes para registrar.', 'info');
+			} catch (error) {
+				if (idSolicitud !== solicitud) return;
+				cuota.replaceChildren(new Option('No se pudieron cargar las cuotas', ''));
+				mostrarMensaje(error instanceof Error ? error.message : 'Ocurrió un error al cargar las cuotas.');
+			}
+		});
+
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			guardar.disabled = true;
+			mensaje.className = 'alert d-none';
+			const cuerpo = new URLSearchParams();
+			new FormData(form).forEach((valor, clave) => cuerpo.append(clave, String(valor)));
+
+			try {
+				const response = await fetch(form.action, {
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: cuerpo,
+				});
+				const resultado = await response.json();
+				if (!response.ok) {
+					mostrarMensaje(resultado.mensajeError);
+					guardar.disabled = false;
+					return;
+				}
+
+				const url = new URL(window.location.href);
+				url.searchParams.set('pago', 'registrado');
+				window.location.assign(url);
+			} catch {
+				mostrarMensaje('No se pudo registrar el pago. Revisá tu conexión e intentá nuevamente.');
+				guardar.disabled = false;
+			}
+		});
+	})();
+</script>
 {{/layout}}
