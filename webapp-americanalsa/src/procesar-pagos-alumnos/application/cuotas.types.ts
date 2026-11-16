@@ -1,6 +1,8 @@
 import type { Cuatrimestre } from '../../core/application/cuatrimestre.js';
+import type { EstadoCuota } from '../../core/application/cuotas.js';
 
-export type EstadoCuota = 'pagada' | 'parcial' | 'pendiente';
+export type { EstadoCuota } from '../../core/application/cuotas.js';
+
 export type OrdenCuotas = 'apellido-asc' | 'apellido-desc' | 'deuda-desc' | 'deuda-asc';
 
 export interface FiltrosCuotas {

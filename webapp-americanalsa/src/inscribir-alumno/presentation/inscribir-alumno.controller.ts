@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import dayjs from 'dayjs';
 import { InscribirAlumnoService } from '../application/inscribir-alumno.service.js';
 import type { InscribirAlumnoDto, ResultadoInscripcion } from '../application/inscribir-alumno.types.js';
 
@@ -39,18 +38,13 @@ export class InscribirAlumnoController {
 		const error = resultado && !resultado.ok ? resultado : undefined;
 		return {
 			esInscripciones: true,
-			fechaActual: dayjs().format('DD/MM/YYYY'),
 			buscar: buscar ?? '',
 			encontrados: encontrados.map((alumno) => ({
 				...alumno,
 				seleccionado: String(alumno.id) === valores.alumnoId,
 			})),
 			hayBusqueda: !!buscar?.trim(),
-			inscripciones: inscripciones.map((i) => ({
-				...i,
-				alumno: `${i.nombre} ${i.apellido}`,
-				fecha: dayjs(i.creadoEn).format('DD/MM/YYYY'),
-			})),
+			inscripciones,
 			alumnoElegido: !!valores.alumnoId,
 			valores: { alumnoId: valores.alumnoId ?? '', apellido: valores.apellido ?? '', nombre: valores.nombre ?? '' },
 			cursos: cursos.map((c) => ({ ...c, seleccionado: String(c.id) === valores.planificacionCursoId })),

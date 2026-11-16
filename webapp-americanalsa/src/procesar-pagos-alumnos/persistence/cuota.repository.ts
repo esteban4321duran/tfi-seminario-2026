@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { calcularSaldoCuota } from '../../core/application/cuotas.js';
 import {
 	alumnoTable,
 	cuotaTable,
@@ -128,7 +129,7 @@ export class CuotaRepository {
 					isNull(pagoCuotaAlumnoTable.borradoEn),
 				));
 
-			const saldo = Math.max(0, Number(cuota.precioCuota) - Number(pagos.total));
+			const saldo = calcularSaldoCuota(Number(cuota.precioCuota), Number(pagos.total));
 			if (saldo <= 0) return { ok: false, motivo: 'cuota_pagada' };
 			if (Math.round(monto * 100) > Math.round(saldo * 100)) {
 				return { ok: false, motivo: 'saldo_insuficiente', saldo };

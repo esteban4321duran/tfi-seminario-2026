@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { cuatrimestreDeFecha, etiquetaCuatrimestre } from '../../core/application/cuatrimestre.js';
-import { calcularFechaCorteCuotas, cuotaVencida } from '../../core/application/cuotas.js';
+import { calcularSaldoCuota, esCuotaVencida, estadoCuota, type EstadoCuota } from '../../core/application/cuotas.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { CuotaRepository, type FilaListadoCuotas } from '../persistence/cuota.repository.js';
-import type { CuentaCuotas, EstadoCuota, FiltrosCuotas, OrdenCuotas } from './cuotas.types.js';
+import type { CuentaCuotas, FiltrosCuotas, OrdenCuotas } from './cuotas.types.js';
 
 const MESES = [
 	'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -16,11 +16,6 @@ function claveMes(fecha: Date): string {
 
 function formatoMes(fecha: Date): string {
 	return new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(fecha);
-}
-
-function estadoCuota(importeTotal: number, importePagado: number): EstadoCuota {
-	if (importePagado >= importeTotal) return 'pagada';
-	return importePagado > 0 ? 'parcial' : 'pendiente';
 }
 
 function etiquetaEstado(estado: EstadoCuota): string {
@@ -38,7 +33,7 @@ export class CuotasService {
 		private readonly formatoMonedaService: FormatoMonedaService,
 	) { }
 
-	private agruparCuentas(filas: FilaListadoCuotas[], formatoDinero: Intl.NumberFormat, fechaCorte: Date): CuentaCuotas[] {
+	private agruparCuentas(filas: FilaListadoCuotas[], formatoDinero: Intl.NumberFormat, ahora: Date): CuentaCuotas[] {
 		const cuentasPorInscripcion = new Map<number, CuentaCuotas>();
 		for (const fila of filas) {
 			const anio = fila.fechaInicio.getFullYear();
@@ -71,7 +66,7 @@ export class CuotasService {
 			if (fila.cuotaId === null || fila.mes === null) continue;
 			const importeTotal = Number(fila.precioCuota);
 			const importePagado = Number(fila.importePagado);
-			const importePendiente = Math.max(0, importeTotal - importePagado);
+			const importePendiente = calcularSaldoCuota(importeTotal, importePagado);
 			const estado = estadoCuota(importeTotal, importePagado);
 			const mesKey = claveMes(fila.mes);
 			cuenta.cuotas.push({
@@ -90,7 +85,7 @@ export class CuotasService {
 			cuenta.cuotasTotal++;
 			if (estado === 'pagada') cuenta.cuotasPagadas++;
 			else cuenta.cuotasPendientes++;
-			if (cuotaVencida(fila.mes, fechaCorte)) cuenta.saldoAdeudado += importePendiente;
+			if (esCuotaVencida(fila.mes, ahora)) cuenta.saldoAdeudado += importePendiente;
 		}
 
 		const todasLasCuentas = Array.from(cuentasPorInscripcion.values());
@@ -184,11 +179,12 @@ export class CuotasService {
 	}
 
 	async getListado(filtros: FiltrosCuotas, inscripcionId?: number) {
+		const ahora = new Date();
 		const filas = await this.repository.getListado(inscripcionId);
 		const cuentas = this.agruparCuentas(
 			filas,
 			this.formatoMonedaService.getFormateador(),
-			calcularFechaCorteCuotas(new Date()),
+			ahora,
 		);
 		const cuentasFiltradas = this.ordenar(this.aplicarFiltros(cuentas, filtros), filtros.orden);
 

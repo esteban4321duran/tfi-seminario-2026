@@ -1,7 +1,18 @@
-export function calcularFechaCorteCuotas(fechaActual: Date): Date {
-	return new Date(Date.UTC(fechaActual.getFullYear(), fechaActual.getMonth(), 1));
+export type EstadoCuota = 'pagada' | 'parcial' | 'pendiente';
+
+const aCentavos = (monto: number) => Math.round(monto * 100);
+
+export function calcularSaldoCuota(precio: number, pagado: number): number {
+	return Math.max(0, aCentavos(precio) - aCentavos(pagado)) / 100;
 }
 
-export function cuotaVencida(mesCuota: Date, fechaCorte: Date): boolean {
-	return mesCuota.getTime() <= fechaCorte.getTime();
+export function estadoCuota(precio: number, pagado: number): EstadoCuota {
+	if (calcularSaldoCuota(precio, pagado) === 0) return 'pagada';
+	return pagado > 0 ? 'parcial' : 'pendiente';
+}
+
+export function esCuotaVencida(mes: Date, hoy: Date): boolean {
+	const claveMesCuota = mes.getUTCFullYear() * 12 + mes.getUTCMonth();
+	const claveMesActual = hoy.getFullYear() * 12 + hoy.getMonth();
+	return claveMesCuota <= claveMesActual;
 }

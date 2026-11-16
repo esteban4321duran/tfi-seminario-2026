@@ -2,10 +2,18 @@ import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es.js';
 import { etiquetaCuatrimestreFecha } from '../../core/application/cuatrimestre.js';
-import { calcularFechaCorteCuotas } from '../../core/application/cuotas.js';
+import { calcularSaldoCuota, esCuotaVencida } from '../../core/application/cuotas.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { InscribirAlumnoRepository } from '../persistence/inscribir-alumno.repository.js';
-import type { CuotaAdeudada, InscribirAlumnoDto, ResultadoInscripcion } from './inscribir-alumno.types.js';
+import type {
+	AlumnoElegido,
+	AlumnoEncontrado,
+	CuotaAdeudada,
+	CursoDisponible,
+	InscripcionReciente,
+	InscribirAlumnoDto,
+	ResultadoInscripcion,
+} from './inscribir-alumno.types.js';
 
 @Injectable()
 export class InscribirAlumnoService {
@@ -14,7 +22,7 @@ export class InscribirAlumnoService {
 		private readonly formatoMonedaService: FormatoMonedaService,
 	) { }
 
-	async getCursosDisponibles() {
+	async getCursosDisponibles(): Promise<CursoDisponible[]> {
 		const filas = await this.repository.getCursosDisponibles();
 		return filas.map((f) => ({
 			id: f.id,
@@ -22,16 +30,33 @@ export class InscribirAlumnoService {
 		}));
 	}
 
-	async listarInscripciones() {
-		return this.repository.listarInscripciones();
+	async listarInscripciones(): Promise<InscripcionReciente[]> {
+		const filas = await this.repository.listarInscripciones();
+		return filas.map((f) => ({
+			id: f.id,
+			alumno: `${f.nombre} ${f.apellido}`,
+			curso: f.curso,
+			fecha: dayjs(f.creadoEn).format('DD/MM/YYYY'),
+		}));
 	}
 
-	async buscarAlumnos(texto: string) {
-		return this.repository.buscarAlumnos(texto);
+	async buscarAlumnos(texto: string): Promise<AlumnoEncontrado[]> {
+		const filas = await this.repository.buscarAlumnos(texto);
+		return filas.map((f) => ({
+			id: f.id,
+			apellido: f.apellido,
+			nombre: f.nombre,
+			dni: f.dni,
+		}));
 	}
 
-	async getAlumno(id: number) {
-		return this.repository.getAlumno(id);
+	async getAlumno(id: number): Promise<AlumnoElegido | undefined> {
+		const alumno = await this.repository.getAlumno(id);
+		return alumno && {
+			id: alumno.id,
+			apellido: alumno.apellido,
+			nombre: alumno.nombre,
+		};
 	}
 
 	async inscribir(dto: InscribirAlumnoDto): Promise<ResultadoInscripcion> {
@@ -57,7 +82,7 @@ export class InscribirAlumnoService {
 			return { ok: false, tipo: 'adeuda_cuotas', mensaje: 'El alumno adeuda cuotas, no se puede realizar la inscripción.', cuotas };
 		}
 
-		const cursando = await this.getCursoEnCurso(alumnoId);
+		const cursando = await this.repository.getCursoEnCurso(alumnoId);
 		if (cursando) {
 			return { ok: false, tipo: 'ya_cursando', mensaje: `El alumno ya está cursando "${cursando}", no se puede inscribir a otro curso.` };
 		}
@@ -68,17 +93,18 @@ export class InscribirAlumnoService {
 	}
 
 	private async getCuotasAdeudadas(alumnoId: number): Promise<CuotaAdeudada[]> {
-		const fechaCorte = calcularFechaCorteCuotas(new Date());
-		const filas = await this.repository.getCuotasAdeudadas(alumnoId, fechaCorte);
+		const ahora = new Date();
+		const filas = await this.repository.getCuotasConPagos(alumnoId);
 		const formatoMoneda = this.formatoMonedaService.getFormateador();
-		return filas.map((f) => ({
-			curso: f.curso,
-			mes: dayjs(f.mes).locale('es').format('MMMM YYYY'),
-			pendiente: formatoMoneda.format(f.pendiente),
-		}));
+		return filas.flatMap((f) => {
+			const pendiente = calcularSaldoCuota(f.precioCuota, f.importePagado);
+			if (!esCuotaVencida(f.mes, ahora) || pendiente === 0) return [];
+			return [{
+				curso: f.curso,
+				mes: dayjs(f.mes).locale('es').format('MMMM YYYY'),
+				pendiente: formatoMoneda.format(pendiente),
+			}];
+		});
 	}
 
-	private async getCursoEnCurso(alumnoId: number): Promise<string | undefined> {
-		return this.repository.getCursoEnCurso(alumnoId);
-	}
 }

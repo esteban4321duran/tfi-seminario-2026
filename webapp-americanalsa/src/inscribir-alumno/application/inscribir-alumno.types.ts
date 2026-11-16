@@ -11,6 +11,31 @@ export interface CuotaAdeudada {
 	pendiente: string;
 }
 
+export interface CursoDisponible {
+	id: number;
+	etiqueta: string;
+}
+
+export interface InscripcionReciente {
+	id: number;
+	alumno: string;
+	curso: string;
+	fecha: string;
+}
+
+export interface AlumnoEncontrado {
+	id: number;
+	apellido: string;
+	nombre: string;
+	dni: string;
+}
+
+export interface AlumnoElegido {
+	id: number;
+	apellido: string;
+	nombre: string;
+}
+
 export type ResultadoInscripcion =
 	| { ok: true; alumnoId: number; anio: number }
 	| { ok: false; tipo: 'faltan_datos'; faltantes: string[] }
