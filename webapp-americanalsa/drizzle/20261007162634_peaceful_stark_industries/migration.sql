@@ -1,0 +1,1 @@
+ALTER TABLE "pago_cuota_alumno" RENAME COLUMN "curso_id" TO "cuota_id";

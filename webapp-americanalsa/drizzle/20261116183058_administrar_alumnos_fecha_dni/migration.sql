@@ -1,0 +1,2 @@
+ALTER TABLE "alumno" ALTER COLUMN "fecha_nacimiento" SET DATA TYPE date USING ("fecha_nacimiento" AT TIME ZONE 'America/Argentina/Tucuman');--> statement-breakpoint
+CREATE UNIQUE INDEX "alumno_dni_activo_unique_idx" ON "alumno" ("dni") WHERE "borrado_en" is null;

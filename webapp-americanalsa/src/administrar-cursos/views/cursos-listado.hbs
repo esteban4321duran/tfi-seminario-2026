@@ -1,0 +1,212 @@
+{{#> layout}}
+<style>
+  body {
+    background: #f3f5f7;
+    color: #18304c;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+  }
+
+  .page-shell {
+    padding: 10px 8px 22px;
+    min-height: calc(100vh - 28px);
+    background: #f3f5f7;
+  }
+
+  .hero-card {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 8px 0 0;
+    margin-bottom: 20px;
+  }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+    font-weight: 800;
+    color: #176fbd;
+    margin-bottom: 8px;
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.15;
+    color: #17314f;
+    font-weight: 800;
+  }
+
+  .lead {
+    margin: 0;
+    color: #6b7f96;
+    font-size: 14px;
+  }
+
+  .btn-primary-soft {
+    background: #287bd0;
+    border: 0;
+    color: white;
+    border-radius: 7px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-primary-soft:hover,
+  .btn-primary-soft:focus-visible {
+    background: #1d69b7;
+    color: #fff;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #e0e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .catalog-panel {
+    margin-top: 0;
+    color: #1d314a;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 18px 12px;
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    font-size: 15px;
+    color: #18304c;
+    font-weight: 800;
+  }
+
+  .catalog-panel .panel-head h2,
+  .catalog-panel .panel-note {
+    color: #18304c;
+  }
+
+  .panel-note {
+    color: #6b7f96;
+    font-size: 13px;
+  }
+
+  .table-wrap {
+    padding: 0 0 4px;
+  }
+
+  .table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+  }
+
+  .table-custom th,
+  .table-custom td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf1f5;
+    text-align: left;
+    color: #294361;
+  }
+
+  .table-custom th {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #72849a;
+    font-weight: 800;
+    background: #f7f9fb;
+  }
+
+  .table-custom td {
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  @media (max-width: 900px) {
+    .page-shell {
+      padding: 4px 0 16px;
+    }
+
+    .hero-row {
+      grid-template-columns: 1fr;
+      display: grid;
+    }
+
+    .hero-row {
+      gap: 12px;
+    }
+
+    .page-topbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+</style>
+
+<div class="page-shell">
+  <section class="hero-card">
+    <div class="eyebrow">Oferta académica</div>
+    <div class="hero-row">
+      <h1>Cursos</h1>
+      <a class="btn btn-primary-soft" href="/administrar-cursos/nuevo">+ Agregar curso</a>
+    </div>
+    <p class="lead">Listado de cursos y disponibilidad de cupos.</p>
+  </section>
+
+  <section class="panel catalog-panel">
+    <div class="panel-head">
+      <h2>Catálogo de cursos</h2>
+      
+    </div>
+
+    <div class="table-wrap">
+      {{#if cursos.length}}
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Cuatrimestre</th>
+            <th>Año</th>
+            <th>Docente</th>
+            <th>Alumnos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each cursos}}
+          <tr {{#if this.esNuevo}}style="background: rgba(35, 200, 120, 0.06);"{{/if}}>
+            <td>{{this.nombre}}</td>
+            <td>{{#if this.cuatrimestre}}{{this.cuatrimestre}}{{else}}—{{/if}}</td>
+            <td>{{this.anio}}</td>
+            <td>{{#if this.instructora}}{{this.instructora}}{{else}}—{{/if}}</td>
+            <td>{{this.cantidadAlumnos}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+      <div class="panel-note" style="padding: 18px;">Todavía no hay cursos cargados.</div>
+      {{/if}}
+    </div>
+  </section>
+
+</div>
+{{/layout}}
