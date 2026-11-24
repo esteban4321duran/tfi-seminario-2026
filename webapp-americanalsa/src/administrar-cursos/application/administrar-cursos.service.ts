@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CUATRIMESTRES, calcularFechasCuatrimestre, cuatrimestreDeFecha, esCuatrimestre, etiquetaCuatrimestre, type Cuatrimestre } from '../../core/application/cuatrimestre.js';
-import { DIAS_SEMANA, normalizarDias, ROL_INSTRUCTOR, type DiaSemana } from '../domain/curso.domain.js';
+import { DIAS_SEMANA, normalizarDias, type DiaSemana } from '../domain/curso.domain.js';
+import { ROL_INSTRUCTOR } from '../../core/application/roles.js';
 import { CursoRepository } from '../persistence/curso.repository.js';
 import type { CrearCursoDto, CursoListado, ResultadoCrearCurso } from './curso.types.js';
 

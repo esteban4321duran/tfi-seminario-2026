@@ -1,0 +1,49 @@
+{{#> layout esResumen=true}}
+<style>
+	.resumen-page, .resumen-page * { font-family: "Segoe UI", Tahoma, sans-serif; }
+	.resumen-page { color: #18304c; padding: 10px 8px 22px; }
+	.resumen-heading { margin: 8px 0 20px; }
+	.resumen-eyebrow { color: #176fbd; font-size: 12px; font-weight: 800; letter-spacing: .08em; margin-bottom: 8px; text-transform: uppercase; }
+	.resumen-heading h1 { color: #17314f; font-size: 28px; font-weight: 800; margin: 0 0 4px; }
+	.resumen-heading p { color: #6b7f96; font-size: 14px; margin: 0; }
+	.resumen-card { background: #fff; border: 1px solid #e0e8f0; border-left: 4px solid #d7a52b; border-radius: 12px; color: inherit; display: block; padding: 18px; text-decoration: none; transition: box-shadow .15s ease, transform .15s ease; }
+	.resumen-card:hover, .resumen-card:focus-visible { box-shadow: 0 5px 16px rgba(24,48,76,.12); color: inherit; outline: none; transform: translateY(-2px); }
+	.resumen-card-vencidas { border-left-color: #c84b4b; }
+	.resumen-card-cursos { border-left-color: #287bd0; }
+	.resumen-card-label { color: #72849a; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+	.resumen-card-value { color: #17314f; font-size: 28px; font-weight: 800; line-height: 1.2; margin: 7px 0 4px; }
+	.resumen-card-help { color: #6b7f96; font-size: 13px; }
+	.resumen-panel { background: #fff; border: 1px solid #e0e8f0; border-radius: 12px; overflow: hidden; }
+	.resumen-panel-header { border-bottom: 1px solid #e8edf2; padding: 18px 18px 12px; }
+	.resumen-panel-header h2 { color: #18304c; font-size: 15px; font-weight: 800; margin: 0; }
+	.resumen-panel-header p { color: #6b7f96; font-size: 13px; margin: 4px 0 0; }
+	.resumen-table th { background: #f7f9fb; color: #72849a; font-size: 11px; font-weight: 800; letter-spacing: .08em; padding: 12px 16px; text-transform: uppercase; }
+	.resumen-table td { border-bottom: 1px solid #edf1f5; color: #294361; font-size: 13px; padding: 12px 16px; }
+	.resumen-table tbody tr:last-child td { border-bottom: 0; }
+	.resumen-attention-link { color: inherit; display: block; text-decoration: none; }
+	.resumen-attention-link:hover, .resumen-attention-link:focus-visible { background: #f7faff; outline: none; }
+	.resumen-badge { background: #f8d7da; border-radius: 999px; color: #842029; display: inline-block; font-size: 12px; font-weight: 800; padding: 3px 9px; }
+	.resumen-more { color: #6b7f96; font-size: 13px; padding: 12px 16px; }
+	.resumen-more a { color: #176fbd; font-weight: 700; }
+</style>
+
+<main class="resumen-page container-fluid">
+	<header class="resumen-heading">
+		<div class="resumen-eyebrow">Panel de control</div>
+		<h1>Resumen</h1>
+		<p>Estado de cuotas y asistencias de {{mesActual}}.</p>
+	</header>
+
+	<section class="row g-3 mb-3" aria-label="Indicadores principales">
+		<div class="col-12 col-md-6 col-xl-3"><a class="resumen-card" href="{{tarjetas.enlaces.pendientes}}" aria-label="{{tarjetas.alumnosConCuotaPendiente}} alumnos con cuotas pendientes en el mes"><div class="resumen-card-label">Alumnos con cuotas pendientes</div><div class="resumen-card-value">{{tarjetas.alumnosConCuotaPendiente}}</div><div class="resumen-card-help">Cuotas de {{mesActual}}</div></a></div>
+		<div class="col-12 col-md-6 col-xl-3"><a class="resumen-card" href="{{tarjetas.enlaces.pendientes}}" aria-label="Monto adeudado de {{tarjetas.montoPendiente}} en el mes"><div class="resumen-card-label">Monto adeudado</div><div class="resumen-card-value">{{tarjetas.montoPendiente}}</div><div class="resumen-card-help">{{#if tarjetas.alumnosConCuotaPendiente}}Cuotas de {{mesActual}}{{else}}Sin deudas pendientes este mes{{/if}}</div></a></div>
+		<div class="col-12 col-md-6 col-xl-3"><a class="resumen-card resumen-card-vencidas" href="{{tarjetas.enlaces.vencidas}}" aria-label="{{tarjetas.alumnosConCuotaVencida}} alumnos con cuotas vencidas"><div class="resumen-card-label">Alumnos con cuotas vencidas</div><div class="resumen-card-value">{{tarjetas.alumnosConCuotaVencida}}</div><div class="resumen-card-help">Meses anteriores</div></a></div>
+		<div class="col-12 col-md-6 col-xl-3"><a class="resumen-card resumen-card-cursos" href="{{tarjetas.enlaces.cursos}}" aria-label="{{tarjetas.cursosEnCurso}} cursos en curso hoy"><div class="resumen-card-label">Cursos en curso</div><div class="resumen-card-value">{{tarjetas.cursosEnCurso}}</div><div class="resumen-card-help">Cursos en curso hoy</div></a></div>
+	</section>
+
+	<section class="row g-3">
+		<div class="col-12 col-xl-7"><section class="resumen-panel"><div class="resumen-panel-header"><h2>Requiere atención</h2><p>Alumnos con 4 o más inasistencias</p></div><div class="table-responsive"><table class="table mb-0 resumen-table"><thead><tr><th scope="col">Alumno</th><th scope="col">Curso</th><th scope="col">Ausencias</th></tr></thead><tbody>{{#each inasistencias}}<tr><td colspan="3" class="p-0"><a class="resumen-attention-link" href="/gestionar-asistencias/historial?cursoId={{this.planificacionId}}"><span class="d-flex justify-content-between gap-3 p-3"><strong>{{this.alumno}}</strong><span class="resumen-badge">{{this.ausencias}}</span></span><span class="d-block px-3 pb-3">{{this.curso}} · {{this.cuatrimestre}}</span></a></td></tr>{{else}}<tr><td class="text-center text-secondary py-4" colspan="3">Ningún alumno alcanzó el límite de inasistencias.</td></tr>{{/each}}</tbody></table></div>{{#if hayMasInasistencias}}<div class="resumen-more">y {{totalInasistencias}} más</div>{{/if}}</section></div>
+		<div class="col-12 col-xl-5"><section class="resumen-panel"><div class="resumen-panel-header d-flex justify-content-between align-items-start gap-2"><div><h2>Inscripciones recientes</h2><p>Las últimas inscripciones registradas</p></div><a href="/inscribir-alumno">Ver todas</a></div><div class="table-responsive"><table class="table mb-0 resumen-table"><thead><tr><th scope="col">Alumno</th><th scope="col">Curso</th><th scope="col">Fecha</th></tr></thead><tbody>{{#each inscripcionesRecientes}}<tr><td>{{this.alumno}}</td><td>{{this.curso}}</td><td>{{this.creadoEn}}</td></tr>{{else}}<tr><td class="text-center text-secondary py-4" colspan="3">Todavía no hay inscripciones registradas.</td></tr>{{/each}}</tbody></table></div></section></div>
+	</section>
+</main>
+{{/layout}}

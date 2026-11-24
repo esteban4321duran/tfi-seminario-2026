@@ -2,12 +2,8 @@ import { BadRequestException, Body, Controller, Get, Post, Query, Render, Res } 
 import type { Response } from 'express';
 import type { FiltrosCuotas } from '../application/cuotas.types.js';
 import { CuotasService } from '../application/cuotas.service.js';
+import { enteroPositivo, leerTexto } from '../../core/presentation/entrada.js';
 
-function enteroPositivo(valor?: string): number | undefined {
-	if (!valor) return undefined;
-	const numero = Number(valor);
-	return Number.isInteger(numero) && numero > 0 ? numero : undefined;
-}
 
 @Controller('cuotas')
 export class CuotasController {
@@ -15,44 +11,52 @@ export class CuotasController {
 
 	@Get()
 	@Render('cuotas-listado')
-	async listado(@Query() query: Record<string, string | undefined>) {
-		const estado = ['pagada', 'parcial', 'pendiente'].includes(query.estado ?? '')
-			? query.estado as FiltrosCuotas['estado']
+	async listado(@Query() query: Record<string, unknown>) {
+		const estadoTexto = leerTexto(query.estado) ?? '';
+		const estado = ['pagada', 'parcial', 'pendiente'].includes(estadoTexto)
+			? estadoTexto as FiltrosCuotas['estado']
 			: undefined;
-		const cuatrimestre = query.cuatrimestre === '1' || query.cuatrimestre === '2'
-			? Number(query.cuatrimestre) as FiltrosCuotas['cuatrimestre']
+
+		const cuatrimestreTexto = leerTexto(query.cuatrimestre);
+		const cuatrimestre = cuatrimestreTexto === '1' || cuatrimestreTexto === '2'
+			? Number(cuatrimestreTexto) as FiltrosCuotas['cuatrimestre']
 			: undefined;
-		const mes = /^\d{2}$/.test(query.mes ?? '') && Number(query.mes) >= 1 && Number(query.mes) <= 12
-			? query.mes
+
+		const mesTexto = leerTexto(query.mes) ?? '';
+		const mes = /^\d{2}$/.test(mesTexto) && Number(mesTexto) >= 1 && Number(mesTexto) <= 12
+			? mesTexto
 			: undefined;
-		const orden = ['apellido-asc', 'apellido-desc', 'deuda-desc', 'deuda-asc'].includes(query.orden ?? '')
-			? query.orden as FiltrosCuotas['orden']
+
+		const ordenTexto = leerTexto(query.orden) ?? '';
+		const orden = ['apellido-asc', 'apellido-desc', 'deuda-desc', 'deuda-asc'].includes(ordenTexto)
+			? ordenTexto as FiltrosCuotas['orden']
 			: 'apellido-asc';
 		const anio = enteroPositivo(query.anio);
 		const filtros: FiltrosCuotas = {
-			buscar: query.buscar?.trim(),
+			buscar: leerTexto(query.buscar)?.trim(),
 			alumnoId: enteroPositivo(query.alumnoId),
 			cursoId: enteroPositivo(query.cursoId),
-			anio,
+			anio: enteroPositivo(query.anio),
 			cuatrimestre,
 			estado,
 			mes,
-			soloConDeuda: query.soloConDeuda === 'on',
+			soloConDeuda: leerTexto(query.soloConDeuda) === 'on',
 			orden,
 		};
 		return {
 			esCuotas: true,
-			pagoRegistrado: query.pago === 'registrado',
+			pagoRegistrado: leerTexto(query.pago) === 'registrado',
 			...(await this.service.getListado(filtros)),
 		};
 	}
 
 	@Get('opciones-pago')
-	async opcionesPago(@Query('inscripcionId') inscripcionIdTexto?: string) {
-		if (inscripcionIdTexto !== undefined && !enteroPositivo(inscripcionIdTexto)) {
+	async opcionesPago(@Query('inscripcionId') inscripcionIdParam?: unknown) {
+		const inscripcionId = enteroPositivo(inscripcionIdParam);
+		if (inscripcionId === undefined) {
 			throw new BadRequestException('La inscripción indicada no es válida.');
 		}
-		return this.service.getOpcionesPago(enteroPositivo(inscripcionIdTexto));
+		return this.service.getOpcionesPago(inscripcionId);
 	}
 
 	@Post('registrar-pago')

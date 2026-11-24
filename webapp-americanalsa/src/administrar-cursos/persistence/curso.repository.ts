@@ -4,9 +4,9 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, asc, count, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import {
   DIAS_SEMANA,
-  ROL_INSTRUCTOR,
   type DiaSemana,
 } from '../domain/curso.domain.js';
+import { ROL_INSTRUCTOR } from '../../core/application/roles.js';
 import {
   asignacionCursoTable,
   cuotaTable,

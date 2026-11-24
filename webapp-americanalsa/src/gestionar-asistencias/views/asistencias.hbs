@@ -1,0 +1,538 @@
+{{#> layout esAsistencias=true}}
+<style>
+	.asistencias-page,
+	.asistencias-page * {
+		font-family: "Segoe UI", Tahoma, sans-serif;
+	}
+
+	.asistencias-page {
+		color: #18304c;
+		padding: 10px 8px 22px;
+	}
+
+	.asistencias-heading {
+		margin: 8px 0 20px;
+	}
+
+	.asistencias-eyebrow {
+		color: #176fbd;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		margin-bottom: 8px;
+		text-transform: uppercase;
+	}
+
+	.asistencias-hero-row {
+		align-items: center;
+		display: flex;
+		gap: 16px;
+		justify-content: space-between;
+		margin-bottom: 6px;
+	}
+
+	.asistencias-heading h1 {
+		color: #17314f;
+		font-size: 28px;
+		font-weight: 800;
+		margin: 0;
+	}
+
+	.asistencias-heading p {
+		color: #6b7f96;
+		font-size: 14px;
+		margin: 0;
+	}
+
+	.asistencias-panel {
+		background: #fff;
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.asistencias-panel-header {
+		align-items: center;
+		border-bottom: 1px solid #e8edf2;
+		display: flex;
+		justify-content: space-between;
+		padding: 18px 18px 12px;
+	}
+
+	.asistencias-panel-header h2 {
+		color: #18304c;
+		font-size: 15px;
+		font-weight: 800;
+		margin: 0;
+	}
+
+	.asistencias-panel-body {
+		padding: 16px 18px;
+	}
+
+	.asistencias-page .form-label {
+		color: #344c67;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.asistencias-page .form-control,
+	.asistencias-page .form-select {
+		border-color: #d7e1eb;
+		border-radius: 7px;
+		color: #294361;
+		font-size: 13px;
+		min-height: 41px;
+	}
+
+	.asistencias-page .form-control:focus,
+	.asistencias-page .form-select:focus {
+		border-color: #3987d5;
+		box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+	}
+
+	.asistencias-page .btn-primary {
+		background: #287bd0;
+		border: 0;
+		border-radius: 7px;
+		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		padding: 10px 16px;
+	}
+
+	.asistencias-page .btn-primary:hover {
+		background: #1d69b7;
+		color: #fff;
+	}
+
+	.asistencias-page .btn,
+	.asistencias-page .table {
+		font-size: 13px;
+	}
+
+	.asistencias-docente {
+		color: #6b7f96;
+		font-size: 13px;
+		margin: 14px 0 0;
+	}
+
+	.asistencias-tabs {
+		margin: 16px 0;
+	}
+
+	.asistencias-tabs .nav-link {
+		color: #287bd0;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.asistencias-tabs .nav-link.active {
+		background: #287bd0;
+		color: #fff;
+	}
+
+	.asistencias-panel-note {
+		color: #6b7f96;
+		font-size: 13px;
+		padding: 18px;
+	}
+
+	.asistencias-results th {
+		background: #f7f9fb;
+		color: #72849a;
+		font-size: 11px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		padding: 12px 16px;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.asistencias-results td {
+		border-bottom: 1px solid #edf1f5;
+		color: #294361;
+		font-size: 13px;
+		padding: 12px 16px;
+		vertical-align: middle;
+	}
+
+	.asistencias-opciones {
+		display: inline-flex;
+		white-space: nowrap;
+	}
+
+	.asistencias-opcion {
+		font-size: 12px;
+		font-weight: 700;
+	}
+
+	.asistencias-opcion-presente {
+		border-color: #16835d;
+		color: #126d4e;
+	}
+
+	.asistencias-radio-presente:checked + .asistencias-opcion-presente {
+		background: #16835d;
+		border-color: #16835d;
+		color: #fff;
+	}
+
+	.asistencias-opcion-ausente {
+		border-color: #b42318;
+		color: #9e1d14;
+	}
+
+	.asistencias-radio-ausente:checked + .asistencias-opcion-ausente {
+		background: #b42318;
+		border-color: #b42318;
+		color: #fff;
+	}
+
+	.asistencias-opcion-justificado {
+		border-color: #946200;
+		color: #765000;
+	}
+
+	.asistencias-radio-justificado:checked + .asistencias-opcion-justificado {
+		background: #946200;
+		border-color: #946200;
+		color: #fff;
+	}
+
+	.asistencias-fila-ausente {
+		background: rgba(180, 35, 24, .045);
+	}
+
+	.asistencias-fila-justificado {
+		background: rgba(148, 98, 0, .07);
+	}
+
+	.asistencias-fila-nueva {
+		background: rgba(35, 200, 120, .06);
+	}
+
+	.asistencias-resumen {
+		color: #6b7f96;
+		font-size: 13px;
+		margin: 6px 0 0;
+	}
+
+	.asistencias-resumen-item + .asistencias-resumen-item::before {
+		content: " · ";
+		margin: 0 4px;
+	}
+
+	.asistencias-badge {
+		font-size: 12px;
+		font-weight: 700;
+		min-width: 34px;
+	}
+
+	.asistencias-badge-presente {
+		background: #16835d;
+		color: #fff;
+	}
+
+	.asistencias-badge-ausente {
+		background: #b42318;
+		color: #fff;
+	}
+
+	.asistencias-badge-justificado {
+		background: #946200;
+		color: #fff;
+	}
+
+	.asistencias-modal-mensaje {
+		white-space: pre-line;
+	}
+
+	@media (max-width: 700px) {
+		.asistencias-page {
+			padding: 4px 0 16px;
+		}
+
+		.asistencias-panel-body {
+			padding: 14px;
+		}
+
+		.asistencias-opciones {
+			display: flex;
+		}
+
+		.asistencias-opcion {
+			padding: 6px 8px;
+		}
+	}
+</style>
+
+<main class="asistencias-page container-fluid">
+	<header class="asistencias-heading">
+		<div class="asistencias-eyebrow">Control de clases</div>
+		<div class="asistencias-hero-row">
+			<h1>Asistencias</h1>
+		</div>
+		<p>Registrá la asistencia de cada clase y consultá su historial.</p>
+	</header>
+
+	{{#if esHistorial}}
+		{{#if guardada}}
+		<div class="alert alert-success" role="status">La asistencia se guardó correctamente.</div>
+		{{/if}}
+		{{#if mensajeAviso}}
+		<div class="alert alert-info" role="status">{{mensajeAviso}}</div>
+		{{/if}}
+		{{#if curso}}
+		<nav class="asistencias-tabs" aria-label="Secciones de asistencia">
+			<div class="nav nav-pills">
+				<a class="nav-link" href="/gestionar-asistencias?cursoId={{curso.id}}">Tomar asistencia</a>
+				<a class="nav-link active" aria-current="page" href="/gestionar-asistencias/historial?cursoId={{curso.id}}">Historial del curso</a>
+			</div>
+		</nav>
+		<section class="asistencias-panel">
+			<div class="asistencias-panel-header">
+				<div>
+					<h2>Historial del curso</h2>
+					<p class="asistencias-resumen mb-0">{{curso.etiqueta}} · Clases dictadas: {{clasesDictadas}} de {{curso.cantidadClases}}</p>
+				</div>
+			</div>
+			<div class="table-responsive asistencias-results">
+				<table class="table table-hover align-middle mb-0">
+					<thead>
+						<tr>
+							<th scope="col">Fecha</th>
+							<th scope="col">Docente</th>
+							{{#each opcionesAsistencia}}
+							<th scope="col">{{this.etiquetaResumen}}</th>
+							{{/each}}
+							<th scope="col">Total</th>
+							<th scope="col">Acciones</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{#each clases}}
+						<tr class="{{#if this.esNueva}}asistencias-fila-nueva{{/if}}">
+							<td>{{this.fecha}}</td>
+							<td>{{this.docente}}</td>
+							{{#each this.conteos}}
+							<td><span class="badge rounded-pill asistencias-badge asistencias-badge-{{this.valor}}">{{this.cantidad}}</span></td>
+							{{/each}}
+							<td>{{this.total}}</td>
+							<td><a class="btn btn-sm btn-outline-primary" href="/gestionar-asistencias?cursoId={{../curso.id}}&amp;fecha={{this.fechaIso}}">Ver / corregir</a></td>
+						</tr>
+						{{else}}
+						<tr><td class="text-center text-secondary py-4" colspan="7">Todavía no se tomó asistencia en este curso.</td></tr>
+						{{/each}}
+					</tbody>
+				</table>
+			</div>
+		</section>
+		{{else}}
+		<div class="asistencias-panel">
+			<p class="asistencias-panel-note mb-0">Volvé a la toma de asistencia para elegir un curso.</p>
+			<a class="btn btn-primary m-3" href="/gestionar-asistencias">Tomar asistencia</a>
+		</div>
+		{{/if}}
+	{{else}}
+		<section class="asistencias-panel">
+			<div class="asistencias-panel-header">
+				<h2>Tomar asistencia</h2>
+			</div>
+			<div class="asistencias-panel-body">
+				<form method="get" action="/gestionar-asistencias">
+					<div class="row g-3 align-items-end">
+						<div class="col-12 col-md-6">
+							<label class="form-label" for="asistenciasCurso">Curso</label>
+							<select class="form-select" id="asistenciasCurso" name="cursoId" required {{#unless cursos.length}}disabled{{/unless}}>
+								<option value="">Seleccione un curso...</option>
+								{{#each cursos}}
+								<option value="{{this.id}}" {{#if this.seleccionado}}selected{{/if}}>{{this.etiqueta}}</option>
+								{{/each}}
+							</select>
+						</div>
+						<div class="col-12 col-md-4">
+							<label class="form-label" for="asistenciasFecha">Fecha</label>
+							<input class="form-control" type="date" id="asistenciasFecha" name="fecha" value="{{fecha}}" max="{{fechaHoy}}" {{#if curso}}min="{{curso.fechaInicio}}"{{/if}} {{#unless cursos.length}}disabled{{/unless}} required>
+						</div>
+						<div class="col-12 col-md-2">
+							<button class="btn btn-primary w-100" type="submit" {{#unless cursos.length}}disabled{{/unless}}>Cargar lista</button>
+						</div>
+					</div>
+					<p class="asistencias-docente mb-0">Docente del curso: {{#if docente}}{{docente}}{{else}}—{{/if}}</p>
+				</form>
+			</div>
+		</section>
+
+		{{#if mensajeAviso}}
+		<div class="alert {{#if errores.length}}alert-danger{{else}}alert-info{{/if}} mt-3" role="status">
+			{{mensajeAviso}}
+			{{#if errores.length}}
+			<ul class="mb-0 mt-2">
+				{{#each errores}}<li>{{this.mensaje}}</li>{{/each}}
+			</ul>
+			{{/if}}
+		</div>
+		{{/if}}
+
+		{{#if curso}}
+			<nav class="asistencias-tabs" aria-label="Secciones de asistencia">
+				<div class="nav nav-pills">
+					<a class="nav-link active" aria-current="page" href="/gestionar-asistencias?cursoId={{curso.id}}&amp;fecha={{fecha}}">Tomar asistencia</a>
+					<a class="nav-link" href="/gestionar-asistencias/historial?cursoId={{curso.id}}">Historial del curso</a>
+				</div>
+			</nav>
+			{{#unless errores.length}}
+			<section class="asistencias-panel">
+				<div class="asistencias-panel-header">
+					<div>
+						<h2>{{curso.etiqueta}} · {{fechaEtiqueta}}</h2>
+						<div class="asistencias-resumen" id="asistenciasResumen" aria-live="polite">
+							{{#each opcionesAsistencia}}
+							<span class="asistencias-resumen-item" data-valor="{{this.valor}}" data-etiqueta="{{this.etiquetaResumen}}">{{this.etiquetaResumen}} 0</span>
+							{{/each}}
+						</div>
+					</div>
+				</div>
+				{{#if claseExistente}}
+				<div class="alert alert-info m-3 mb-0" role="status">Ya hay asistencia registrada para esta fecha. Al guardar se actualiza.</div>
+				{{/if}}
+				<div class="alert alert-danger d-none asistencias-modal-mensaje m-3 mb-0" id="asistenciasMensaje" role="alert"></div>
+				{{#if alumnos.length}}
+				<form id="asistenciasForm" data-curso-id="{{curso.id}}" data-fecha="{{fecha}}">
+					<div class="table-responsive asistencias-results">
+						<table class="table table-hover align-middle mb-0">
+							<thead>
+								<tr>
+									<th scope="col">N.º</th>
+									<th scope="col">Alumno</th>
+									<th scope="col">DNI</th>
+									<th scope="col">Asistencia</th>
+								</tr>
+							</thead>
+							<tbody>
+								{{#each alumnos}}
+								<tr class="asistencias-fila-{{this.valor}}">
+									<td>{{this.numero}}</td>
+									<td><strong>{{this.apellido}}, {{this.nombre}}</strong></td>
+									<td>{{this.dni}}</td>
+									<td>
+										<div class="asistencias-opciones" role="radiogroup" aria-label="Asistencia de {{this.apellido}}, {{this.nombre}}" data-inscripcion-id="{{this.inscripcionId}}">
+											{{#each this.opciones}}
+											<input class="btn-check asistencias-radio asistencias-radio-{{this.valor}}" type="radio" id="asistencia-{{../inscripcionId}}-{{this.valor}}" name="asistencia-{{../inscripcionId}}" value="{{this.valor}}" data-etiqueta-resumen="{{this.etiquetaResumen}}" {{#if this.seleccionado}}checked{{/if}} required>
+											<label class="btn btn-outline-secondary asistencias-opcion asistencias-opcion-{{this.valor}}" for="asistencia-{{../inscripcionId}}-{{this.valor}}">{{this.etiqueta}}</label>
+											{{/each}}
+										</div>
+									</td>
+								</tr>
+								{{/each}}
+							</tbody>
+						</table>
+					</div>
+					<div class="asistencias-panel-body d-flex gap-2">
+						<button class="btn btn-primary" id="asistenciasGuardar" type="submit">Guardar asistencia</button>
+						<a class="btn btn-outline-secondary" href="/gestionar-asistencias?cursoId={{curso.id}}">Cancelar</a>
+					</div>
+				</form>
+				{{else}}
+				<div class="asistencias-panel-note">Este curso no tiene alumnos inscriptos; no se puede guardar una clase vacía.</div>
+				<div class="asistencias-panel-body pt-0">
+					<button class="btn btn-primary" type="button" disabled>Guardar asistencia</button>
+					<a class="btn btn-outline-secondary" href="/gestionar-asistencias?cursoId={{curso.id}}">Cancelar</a>
+				</div>
+				{{/if}}
+			</section>
+			{{/unless}}
+		{{/if}}
+	{{/if}}
+</main>
+
+<script>
+	(() => {
+		const form = document.getElementById('asistenciasForm');
+		if (!form) return;
+
+		const guardar = document.getElementById('asistenciasGuardar');
+		const mensaje = document.getElementById('asistenciasMensaje');
+		const resumen = document.getElementById('asistenciasResumen');
+		const filas = Array.from(form.querySelectorAll('[data-inscripcion-id]'));
+		const resumenItems = Array.from(resumen.querySelectorAll('[data-valor]'));
+		const clasesFila = resumenItems.map((item) => `asistencias-fila-${item.dataset.valor}`);
+
+		const ocultarMensaje = () => {
+			mensaje.className = 'alert alert-danger d-none asistencias-modal-mensaje m-3 mb-0';
+			mensaje.textContent = '';
+		};
+
+		const mostrarErrores = (resultado) => {
+			const datos = resultado && typeof resultado === 'object' ? resultado : {};
+			const errores = Array.isArray(datos.errores)
+				? datos.errores.map((error) => typeof error?.mensaje === 'string' ? error.mensaje : '').filter(Boolean)
+				: [];
+			const textos = [datos.mensajeError, ...errores].filter((texto) => typeof texto === 'string' && texto);
+			mensaje.className = 'alert alert-danger asistencias-modal-mensaje m-3 mb-0';
+			mensaje.textContent = textos.length
+				? textos.join('\n')
+				: 'No se pudo guardar la asistencia. Revisá los datos e intentá nuevamente.';
+		};
+
+		const actualizarResumen = () => {
+			const conteos = new Map(resumenItems.map((item) => [item.dataset.valor, 0]));
+			filas.forEach((grupo) => {
+				const seleccion = grupo.querySelector('input:checked');
+				const fila = grupo.closest('tr');
+				fila.classList.remove(...clasesFila);
+				if (!seleccion) return;
+				conteos.set(seleccion.value, (conteos.get(seleccion.value) ?? 0) + 1);
+				fila.classList.add(`asistencias-fila-${seleccion.value}`);
+			});
+			resumenItems.forEach((item) => {
+				item.textContent = `${item.dataset.etiqueta} ${conteos.get(item.dataset.valor) ?? 0}`;
+			});
+		};
+
+		form.addEventListener('change', actualizarResumen);
+		actualizarResumen();
+
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			guardar.disabled = true;
+			ocultarMensaje();
+			const cuerpo = {
+				cursoId: form.dataset.cursoId,
+				fecha: form.dataset.fecha,
+				asistencias: filas.map((grupo) => ({
+					inscripcionId: grupo.dataset.inscripcionId,
+					valor: grupo.querySelector('input:checked')?.value,
+				})),
+			};
+
+			try {
+				const response = await fetch('/gestionar-asistencias', {
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(cuerpo),
+				});
+				const resultado = await response.json();
+				if (!response.ok) {
+					mostrarErrores(resultado);
+					guardar.disabled = false;
+					return;
+				}
+
+				const url = new URL('/gestionar-asistencias/historial', window.location.origin);
+				url.searchParams.set('cursoId', form.dataset.cursoId);
+				url.searchParams.set('guardada', String(resultado.id));
+				window.location.assign(url);
+			} catch {
+				mensaje.className = 'alert alert-danger asistencias-modal-mensaje m-3 mb-0';
+				mensaje.textContent = 'No se pudo guardar la asistencia. Revisá tu conexión e intentá nuevamente.';
+				guardar.disabled = false;
+			}
+		});
+	})();
+</script>
+{{/layout}}

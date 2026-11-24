@@ -20,7 +20,11 @@ describe('AppController (e2e)', () => {
     const sharedViewsDir = join(import.meta.dirname, '..', 'src', 'views');
     const procesarPagosViewsDir = join(import.meta.dirname, '..', 'src', 'procesar-pagos-alumnos', 'views');
     const administrarCursosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-cursos', 'views');
-    app.setBaseViewsDir([sharedViewsDir, procesarPagosViewsDir, administrarCursosViewsDir]);
+    const administrarAlumnosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-alumnos', 'views');
+    const inscribirAlumnoViewsDir = join(import.meta.dirname, '..', 'src', 'inscribir-alumno', 'views');
+    const gestionarAsistenciasViewsDir = join(import.meta.dirname, '..', 'src', 'gestionar-asistencias', 'views');
+    const resumenViewsDir = join(import.meta.dirname, '..', 'src', 'resumen', 'views');
+    app.setBaseViewsDir([sharedViewsDir, procesarPagosViewsDir, administrarCursosViewsDir, administrarAlumnosViewsDir, inscribirAlumnoViewsDir, gestionarAsistenciasViewsDir, resumenViewsDir]);
     hbs.registerPartials(join(sharedViewsDir, 'partials'));
     app.setViewEngine('hbs');
     await app.init();
@@ -30,8 +34,8 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect(/hello/)
-      .expect(/world/);
+      .expect(/Panel de control/)
+      .expect(/Inscripciones recientes/);
   });
 
   it('/cuotas (GET) renders the filtered account list', () => {
@@ -42,6 +46,53 @@ describe('AppController (e2e)', () => {
       .expect(/Cuentas corrientes/)
       .expect(/id="cuotasPagoModal"/)
       .expect(/data-bs-target="#cuotasPagoModal"/);
+  });
+
+  it('/administrar-alumnos (GET) renders the student list', () => {
+    return request(app.getHttpServer())
+      .get('/administrar-alumnos?buscar=ana&buscar=juan')
+      .expect(200)
+      .expect(/Gestión de alumnos/)
+      .expect(/alumnosRegistroModal/);
+  });
+
+  it('/administrar-alumnos (POST) returns field validation errors as JSON', () => {
+    return request(app.getHttpServer())
+      .post('/administrar-alumnos')
+      .set('Accept', 'application/json')
+      .type('form')
+      .send({})
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .expect((response) => {
+        expect(response.body.mensajeError).toBe('Revisá los datos ingresados.');
+        expect(response.body.errores).toEqual(expect.arrayContaining([
+          expect.objectContaining({ campo: 'nombre' }),
+          expect.objectContaining({ campo: 'dni' }),
+          expect.objectContaining({ campo: 'fechaNacimiento' }),
+        ]));
+      });
+  });
+
+  it('/gestionar-asistencias (GET) handles repeated query parameters', () => {
+    return request(app.getHttpServer())
+      .get('/gestionar-asistencias?cursoId=1&cursoId=2')
+      .expect(200)
+      .expect(/Control de clases/)
+      .expect(/Tomar asistencia/);
+  });
+
+  it('/gestionar-asistencias (POST) rejects malformed identifiers as JSON', () => {
+    return request(app.getHttpServer())
+      .post('/gestionar-asistencias')
+      .set('Accept', 'application/json')
+      .send({ cursoId: {}, fecha: [], asistencias: 'no-es-una-lista' })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .expect((response) => {
+        expect(response.body).toHaveProperty('mensajeError');
+        expect(Array.isArray(response.body.errores)).toBe(true);
+      });
   });
 
   it('/cuotas/opciones-pago (GET) returns pending installment options as JSON', () => {

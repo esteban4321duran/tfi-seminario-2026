@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, Render, Res } from '@nestjs/common'
 import type { Response } from 'express';
 import { InscribirAlumnoService } from '../application/inscribir-alumno.service.js';
 import type { InscribirAlumnoDto, ResultadoInscripcion } from '../application/inscribir-alumno.types.js';
+import { enteroPositivo, leerTexto } from '../../core/presentation/entrada.js';
 
 @Controller('inscribir-alumno')
 export class InscribirAlumnoController {
@@ -9,10 +10,12 @@ export class InscribirAlumnoController {
 
 	@Get()
 	@Render('inscripcion-formulario')
-	async formulario(@Query('buscar') buscar?: string, @Query('alumnoId') alumnoId?: string) {
+	async formulario(@Query('buscar') buscarParam?: unknown, @Query('alumnoId') alumnoIdParam?: unknown,) {
+		const buscar = leerTexto(buscarParam);
+		const alumnoId = enteroPositivo(alumnoIdParam);
 		const valores: InscribirAlumnoDto = {};
-		if (alumnoId) {
-			const alumno = await this.service.getAlumno(Number(alumnoId));
+		if (alumnoId !== undefined) {
+			const alumno = await this.service.getAlumno(alumnoId);
 			if (alumno) {
 				valores.alumnoId = String(alumno.id);
 				valores.apellido = alumno.apellido;

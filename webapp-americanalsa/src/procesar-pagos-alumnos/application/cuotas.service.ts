@@ -4,19 +4,13 @@ import { calcularSaldoCuota, esCuotaVencida, estadoCuota, type EstadoCuota } fro
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { CuotaRepository, type FilaListadoCuotas } from '../persistence/cuota.repository.js';
 import type { CuentaCuotas, FiltrosCuotas, OrdenCuotas } from './cuotas.types.js';
+import { claveMes, etiquetaMes } from '../../core/application/fechas.js';
 
 const MESES = [
 	'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
 	'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-function claveMes(fecha: Date): string {
-	return fecha.toISOString().slice(0, 7);
-}
-
-function formatoMes(fecha: Date): string {
-	return new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(fecha);
-}
 
 function etiquetaEstado(estado: EstadoCuota): string {
 	switch (estado) {
@@ -56,6 +50,8 @@ export class CuotasService {
 					cuotasTotal: 0,
 					saldoAdeudado: 0,
 					saldoAdeudadoFormato: '',
+					saldoVencido: 0,
+					saldoVencidoFormato: '',
 					cuotas: [],
 				};
 				cuentasPorInscripcion.set(fila.inscripcionId, nuevaCuenta);
@@ -71,7 +67,7 @@ export class CuotasService {
 			const mesKey = claveMes(fila.mes);
 			cuenta.cuotas.push({
 				id: fila.cuotaId,
-				mes: formatoMes(fila.mes),
+				mes: etiquetaMes(fila.mes),
 				mesKey,
 				importeTotal,
 				importeTotalFormato: formatoDinero.format(importeTotal),
@@ -85,12 +81,14 @@ export class CuotasService {
 			cuenta.cuotasTotal++;
 			if (estado === 'pagada') cuenta.cuotasPagadas++;
 			else cuenta.cuotasPendientes++;
-			if (esCuotaVencida(fila.mes, ahora)) cuenta.saldoAdeudado += importePendiente;
+			cuenta.saldoAdeudado += importePendiente;
+			if (esCuotaVencida(fila.mes, ahora)) cuenta.saldoVencido += importePendiente;
 		}
 
 		const todasLasCuentas = Array.from(cuentasPorInscripcion.values());
 		for (const cuenta of todasLasCuentas) {
 			cuenta.saldoAdeudadoFormato = formatoDinero.format(cuenta.saldoAdeudado);
+			cuenta.saldoVencidoFormato = formatoDinero.format(cuenta.saldoVencido);
 		}
 		return todasLasCuentas;
 	}
@@ -103,7 +101,7 @@ export class CuotasService {
 			.filter((cuenta) => filtros.anio === undefined || cuenta.anio === filtros.anio)
 			.filter((cuenta) => filtros.cuatrimestre === undefined || cuenta.cuatrimestre === filtros.cuatrimestre)
 			.filter((cuenta) => !termino || `${cuenta.apellido} ${cuenta.nombre} ${cuenta.dni}`.toLocaleLowerCase('es').includes(termino))
-			.filter((cuenta) => !filtros.soloConDeuda || cuenta.saldoAdeudado > 0)
+			.filter((cuenta) => !filtros.soloConDeuda || cuenta.saldoVencido > 0)
 			.filter((cuenta) => (!filtros.mes && !filtros.estado) || cuenta.cuotas.some((cuota) =>
 				(!filtros.mes || cuota.mesKey.slice(5, 7) === filtros.mes) &&
 				(!filtros.estado || cuota.estado === filtros.estado),
@@ -195,7 +193,7 @@ export class CuotasService {
 		};
 	}
 
-	async getOpcionesPago(inscripcionId?: number) {
+	async getOpcionesPago(inscripcionId: number) {
 		const { cuentas } = await this.getListado({}, inscripcionId);
 		return cuentas
 			.flatMap((cuenta) => cuenta.cuotas

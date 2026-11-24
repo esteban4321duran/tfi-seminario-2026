@@ -361,7 +361,7 @@
 
 			try {
 				const url = new URL('/cuotas/opciones-pago', window.location.origin);
-				if (inscripcionId) url.searchParams.set('inscripcionId', inscripcionId);
+				url.searchParams.set('inscripcionId', inscripcionId ?? '');
 				const response = await fetch(url);
 				if (!response.ok) throw new Error('No se pudieron cargar las cuotas pendientes.');
 				const opciones = await response.json();

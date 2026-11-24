@@ -1,0 +1,355 @@
+{{#> layout esAlumnos=true}}
+<style>
+	.alumnos-page,
+	.alumnos-page * {
+		font-family: "Segoe UI", Tahoma, sans-serif;
+	}
+
+	.alumnos-page {
+		color: #18304c;
+		padding: 10px 8px 22px;
+	}
+
+	.alumnos-heading {
+		margin: 8px 0 20px;
+	}
+
+	.alumnos-eyebrow {
+		color: #176fbd;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		margin-bottom: 8px;
+		text-transform: uppercase;
+	}
+
+	.alumnos-hero-row {
+		align-items: center;
+		display: flex;
+		gap: 16px;
+		justify-content: space-between;
+		margin-bottom: 6px;
+	}
+
+	.alumnos-heading h1 {
+		color: #17314f;
+		font-size: 28px;
+		font-weight: 800;
+		margin: 0;
+	}
+
+	.alumnos-heading p {
+		color: #6b7f96;
+		font-size: 14px;
+		margin: 0;
+	}
+
+	.alumnos-page .btn-primary,
+	.alumnos-modal .btn-primary {
+		background: #287bd0;
+		border: 0;
+		border-radius: 7px;
+		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		padding: 10px 16px;
+	}
+
+	.alumnos-page .btn-primary:hover,
+	.alumnos-modal .btn-primary:hover {
+		background: #1d69b7;
+		color: #fff;
+	}
+
+	.alumnos-panel {
+		background: #fff;
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.alumnos-panel-header {
+		align-items: center;
+		border-bottom: 1px solid #e8edf2;
+		display: flex;
+		justify-content: space-between;
+		padding: 18px 18px 12px;
+	}
+
+	.alumnos-panel-header h2 {
+		color: #18304c;
+		font-size: 15px;
+		font-weight: 800;
+		margin: 0;
+	}
+
+	.alumnos-search {
+		padding: 16px 18px;
+	}
+
+	.alumnos-page .form-label {
+		color: #344c67;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.alumnos-page .form-control {
+		border-color: #d7e1eb;
+		border-radius: 7px;
+		color: #294361;
+		font-size: 13px;
+		min-height: 41px;
+	}
+
+	.alumnos-page .form-control:focus {
+		border-color: #3987d5;
+		box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+	}
+
+	.alumnos-page .btn,
+	.alumnos-page .table {
+		font-size: 13px;
+	}
+
+	.alumnos-results th {
+		background: #f7f9fb;
+		color: #72849a;
+		font-size: 11px;
+		font-weight: 800;
+		letter-spacing: .08em;
+		padding: 12px 16px;
+		text-transform: uppercase;
+	}
+
+	.alumnos-results td {
+		border-bottom: 1px solid #edf1f5;
+		color: #294361;
+		font-size: 13px;
+		padding: 12px 16px;
+	}
+
+	.alumnos-row-nuevo {
+		background: rgba(35, 200, 120, 0.06);
+	}
+
+	.alumnos-modal .modal-content {
+		border: 1px solid #e0e8f0;
+		border-radius: 12px;
+	}
+
+	.alumnos-modal .modal-title {
+		color: #17314f;
+		font-size: 18px;
+		font-weight: 800;
+	}
+
+	.alumnos-modal .modal-body {
+		color: #18304c;
+	}
+
+	.alumnos-modal .form-label {
+		color: #344c67;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.alumnos-modal .form-control {
+		border-color: #d7e1eb;
+		border-radius: 7px;
+		min-height: 41px;
+	}
+
+	.alumnos-modal .form-control:focus {
+		border-color: #3987d5;
+		box-shadow: 0 0 0 3px rgba(48, 132, 213, .12);
+	}
+
+	.alumnos-modal-mensaje {
+		white-space: pre-line;
+	}
+
+	@media (max-width: 700px) {
+		.alumnos-page {
+			padding: 4px 0 16px;
+		}
+
+		.alumnos-hero-row {
+			align-items: flex-start;
+		}
+	}
+</style>
+
+<main class="alumnos-page container-fluid">
+	<header class="alumnos-heading">
+		<div class="alumnos-eyebrow">Gestión de alumnos</div>
+		<div class="alumnos-hero-row">
+			<h1>Alumnos</h1>
+			<button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#alumnosRegistroModal">+ Registrar alumno</button>
+		</div>
+		<p>Consultá y mantené actualizado el registro de alumnos.</p>
+	</header>
+
+	{{#if creado}}
+	<div class="alert alert-success" role="status">El alumno se registró correctamente.</div>
+	{{/if}}
+
+	<section class="alumnos-panel">
+		<div class="alumnos-panel-header">
+			<h2>{{#if hayBusqueda}}Resultados de la búsqueda{{else}}Últimos alumnos registrados{{/if}}</h2>
+		</div>
+		<form class="alumnos-search" method="get" action="/administrar-alumnos">
+			<div class="row g-2 align-items-end">
+				<div class="col-12 col-md">
+					<label class="form-label" for="alumnosBuscar">Buscar alumno</label>
+					<input class="form-control" type="search" id="alumnosBuscar" name="buscar" value="{{buscar}}" placeholder="Apellido, nombre o DNI">
+				</div>
+				<div class="col-auto">
+					<button class="btn btn-primary" type="submit">Buscar</button>
+				</div>
+				{{#if hayBusqueda}}
+				<div class="col-auto">
+					<a class="btn btn-outline-secondary" href="/administrar-alumnos">Limpiar</a>
+				</div>
+				{{/if}}
+			</div>
+		</form>
+		<div class="table-responsive alumnos-results">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr>
+						<th scope="col">Alumno</th>
+						<th scope="col">DNI</th>
+						<th scope="col">Email</th>
+						<th scope="col">Teléfono</th>
+						<th scope="col">Registrado el</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each alumnos}}
+					<tr class="{{#if this.esNuevo}}alumnos-row-nuevo{{/if}}">
+						<td><strong>{{this.apellido}}, {{this.nombre}}</strong></td>
+						<td>{{this.dni}}</td>
+						<td>{{this.email}}</td>
+						<td>{{this.telefono}}</td>
+						<td>{{this.creadoEn}}</td>
+					</tr>
+					{{else}}
+					<tr>
+						<td class="text-center text-secondary py-4" colspan="5">{{#if hayBusqueda}}No se encontraron alumnos con esa búsqueda.{{else}}Todavía no hay alumnos registrados.{{/if}}</td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</main>
+
+<div class="modal fade alumnos-modal" id="alumnosRegistroModal" tabindex="-1" aria-labelledby="alumnosRegistroModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title" id="alumnosRegistroModalLabel">Registrar alumno</h2>
+				<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+			</div>
+			<div class="modal-body">
+				<div class="alert alert-danger d-none alumnos-modal-mensaje" id="alumnosRegistroMensaje" role="alert"></div>
+				<form id="alumnosRegistroForm" method="post" action="/administrar-alumnos">
+					<div class="row g-3">
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosNombre">Nombre</label>
+							<input class="form-control" type="text" id="alumnosNombre" name="nombre" maxlength="100" autocomplete="given-name" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosApellido">Apellido</label>
+							<input class="form-control" type="text" id="alumnosApellido" name="apellido" maxlength="100" autocomplete="family-name" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosDni">DNI</label>
+							<input class="form-control" type="text" id="alumnosDni" name="dni" inputmode="numeric" pattern="[0-9]{7,8}" maxlength="8" autocomplete="off" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosFechaNacimiento">Fecha de nacimiento</label>
+							<input class="form-control" type="date" id="alumnosFechaNacimiento" name="fechaNacimiento" max="{{fechaHoy}}" autocomplete="bday" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosEmail">Email</label>
+							<input class="form-control" type="email" id="alumnosEmail" name="email" maxlength="100" autocomplete="email" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="alumnosTelefono">Teléfono</label>
+							<input class="form-control" type="tel" id="alumnosTelefono" name="telefono" inputmode="numeric" pattern="[0-9]{1,10}" maxlength="10" autocomplete="tel" required>
+						</div>
+						<div class="col-12">
+							<label class="form-label" for="alumnosDomicilio">Domicilio</label>
+							<input class="form-control" type="text" id="alumnosDomicilio" name="domicilio" maxlength="200" autocomplete="street-address" required>
+						</div>
+						<div class="col-12 d-flex gap-2">
+							<button class="btn btn-primary" id="alumnosRegistroGuardar" type="submit">Guardar alumno</button>
+							<button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	(() => {
+		const modal = document.getElementById('alumnosRegistroModal');
+		const form = document.getElementById('alumnosRegistroForm');
+		const guardar = document.getElementById('alumnosRegistroGuardar');
+		const mensaje = document.getElementById('alumnosRegistroMensaje');
+
+		const ocultarMensaje = () => {
+			mensaje.className = 'alert alert-danger d-none alumnos-modal-mensaje';
+			mensaje.textContent = '';
+		};
+
+		const mostrarErrores = (resultado) => {
+			const errores = Array.isArray(resultado.errores)
+				? resultado.errores.map((error) => typeof error?.mensaje === 'string' ? error.mensaje : '').filter(Boolean)
+				: [];
+			mensaje.className = 'alert alert-danger alumnos-modal-mensaje';
+			mensaje.textContent = [resultado.mensajeError, ...errores].filter((texto) => typeof texto === 'string' && texto).join('\n');
+		};
+
+		modal.addEventListener('show.bs.modal', () => {
+			form.reset();
+			ocultarMensaje();
+			guardar.disabled = false;
+		});
+
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			guardar.disabled = true;
+			ocultarMensaje();
+			const cuerpo = new URLSearchParams();
+			new FormData(form).forEach((valor, clave) => cuerpo.append(clave, String(valor)));
+
+			try {
+				const response = await fetch(form.action, {
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: cuerpo,
+				});
+				const resultado = await response.json();
+				if (!response.ok) {
+					mostrarErrores(resultado);
+					guardar.disabled = false;
+					return;
+				}
+
+				window.location.assign(`/administrar-alumnos?creado=${encodeURIComponent(resultado.id)}`);
+			} catch {
+				mensaje.className = 'alert alert-danger alumnos-modal-mensaje';
+				mensaje.textContent = 'No se pudo registrar el alumno. Revisá tu conexión e intentá nuevamente.';
+				guardar.disabled = false;
+			}
+		});
+	})();
+</script>
+{{/layout}}

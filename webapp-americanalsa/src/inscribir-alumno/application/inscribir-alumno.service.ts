@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
-import 'dayjs/locale/es.js';
 import { etiquetaCuatrimestreFecha } from '../../core/application/cuatrimestre.js';
 import { calcularSaldoCuota, esCuotaVencida } from '../../core/application/cuotas.js';
 import { FormatoMonedaService } from '../../core/application/formato-moneda-service/formato-moneda-service.js';
 import { InscribirAlumnoRepository } from '../persistence/inscribir-alumno.repository.js';
+import { etiquetaMes } from '../../core/application/fechas.js';
 import type {
 	AlumnoElegido,
 	AlumnoEncontrado,
@@ -101,7 +101,7 @@ export class InscribirAlumnoService {
 			if (!esCuotaVencida(f.mes, ahora) || pendiente === 0) return [];
 			return [{
 				curso: f.curso,
-				mes: dayjs(f.mes).locale('es').format('MMMM YYYY'),
+				mes: etiquetaMes(f.mes),
 				pendiente: formatoMoneda.format(pendiente),
 			}];
 		});

@@ -7,7 +7,10 @@ import hbs from 'hbs'
 const sharedViewsDir = join(import.meta.dirname, '..', 'src', 'views');
 const procesarPagosViewsDir = join(import.meta.dirname, '..', 'src', 'procesar-pagos-alumnos', 'views');
 const administrarCursosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-cursos', 'views');
+const administrarAlumnosViewsDir = join(import.meta.dirname, '..', 'src', 'administrar-alumnos', 'views');
 const inscribirAlumnoViewsDir = join(import.meta.dirname, '..', 'src', 'inscribir-alumno', 'views');
+const gestionarAsistenciasViewsDir = join(import.meta.dirname, '..', 'src', 'gestionar-asistencias', 'views');
+const resumenViewsDir = join(import.meta.dirname, '..', 'src', 'resumen', 'views');
 //configurar el motor de plantillas para generar vistas porque usamos el patrón MVC
 //https://docs.nestjs.com/http/mvc
 
@@ -21,7 +24,7 @@ async function bootstrap() {
   app.useStaticAssets(join(import.meta.dirname, '..', 'public')); //definir directorio para archivos estáticos que necesitamos servir, por ej, CSS y JS de bootstrap
 
   // registro global de vistas y partials compartidos
-  app.setBaseViewsDir([sharedViewsDir, procesarPagosViewsDir, administrarCursosViewsDir, inscribirAlumnoViewsDir]);
+  app.setBaseViewsDir([sharedViewsDir, procesarPagosViewsDir, administrarCursosViewsDir, administrarAlumnosViewsDir, inscribirAlumnoViewsDir, gestionarAsistenciasViewsDir, resumenViewsDir]);
   hbs.registerPartials(join(sharedViewsDir, 'partials'));
   app.setViewEngine('hbs');
 

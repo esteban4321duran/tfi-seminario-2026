@@ -47,5 +47,7 @@ export interface CuentaCuotas {
 	cuotasTotal: number;
 	saldoAdeudado: number;
 	saldoAdeudadoFormato: string;
+	saldoVencido: number;
+	saldoVencidoFormato: string;
 	cuotas: CuotaDetalle[];
 }

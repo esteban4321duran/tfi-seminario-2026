@@ -1,4 +1,5 @@
-import { pgTable, integer, varchar, timestamp, decimal, date, time, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, integer, varchar, timestamp, decimal, date, time, pgEnum, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 const MAX_NAME_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 100;
@@ -19,7 +20,7 @@ const timestampsSchema = {
 //https://supabase.com/blog/choosing-a-postgres-primary-key#integerbiginteger-again
 export const alumnoTable = pgTable('alumno', {
 	id: integer().generatedAlwaysAsIdentity().primaryKey(),
-	fechaNacimiento: timestamp('fecha_nacimiento', { mode: "date", withTimezone: true }).notNull(),
+	fechaNacimiento: date('fecha_nacimiento', { mode: 'date' }).notNull(),
 	nombre: varchar({ length: MAX_NAME_LENGTH }).notNull(),
 	apellido: varchar({ length: MAX_NAME_LENGTH }).notNull(),
 	email: varchar({ length: MAX_EMAIL_LENGTH }).notNull(),
@@ -27,7 +28,9 @@ export const alumnoTable = pgTable('alumno', {
 	domicilio: varchar({ length: MAX_DOMICILIO_LENGTH }).notNull(),
 	dni: varchar({ length: MAX_DNI_LENGTH }).notNull(),
 	...timestampsSchema,
-});
+}, (table) => [
+	uniqueIndex('alumno_dni_activo_unique_idx').on(table.dni).where(sql`${table.borradoEn} is null`),
+]);
 
 //https://orm.drizzle.team/docs/column-types#enum
 export const nivelEnum = pgEnum("nivel", ["a1", "a2", "b1", "b2", "b3",]);
@@ -55,14 +58,19 @@ export const inscripcionAlumnoTable = pgTable('inscripcion_alumno', {
 	alumnoId: integer('alumno_id').notNull().references(() => alumnoTable.id),
 	planificacionCursoId: integer('planificacion_curso_id').notNull().references(() => planificacionCursoTable.id),
 	...timestampsSchema
-});
+}, (table) => [
+	index('idx_inscripcion_alumno_alumno_id').on(table.alumnoId),
+	index('idx_inscripcion_alumno_planificacion_curso_id').on(table.planificacionCursoId),
+]);
 
 export const cuotaTable = pgTable('cuota', {
 	id: integer().generatedAlwaysAsIdentity().primaryKey(),
 	mes: date({ mode: "date" }).notNull(),
 	planificacionCursoId: integer('planificacion_curso_id').notNull().references(() => planificacionCursoTable.id),
 	...timestampsSchema
-});
+}, (table) => [
+	index('idx_cuota_planificacion_curso_id').on(table.planificacionCursoId),
+]);
 
 export const pagoCuotaAlumnoTable = pgTable('pago_cuota_alumno', {
 	id: integer().generatedAlwaysAsIdentity().primaryKey(),
@@ -70,7 +78,10 @@ export const pagoCuotaAlumnoTable = pgTable('pago_cuota_alumno', {
 	inscripcionAlumnoId: integer('inscripcion_alumno_id').notNull().references(() => inscripcionAlumnoTable.id),
 	cuotaId: integer('cuota_id').notNull().references(() => cuotaTable.id),
 	...timestampsSchema
-})
+}, (table) => [
+	index('idx_pago_cuota_alumno_inscripcion_alumno_id').on(table.inscripcionAlumnoId),
+	index('idx_pago_cuota_alumno_cuota_id').on(table.cuotaId),
+]);
 
 export const matriculaTable = pgTable('matricula', {
 	id: integer().generatedAlwaysAsIdentity().primaryKey(),
@@ -102,6 +113,36 @@ export const asignacionCursoTable = pgTable('asignacion_curso', {
 	rol: rolAsignacionEnum().notNull(),
 	...timestampsSchema
 });
+
+export const valorAsistenciaEnum = pgEnum('valor_asistencia', ['presente', 'ausente', 'justificado']);
+
+export const claseDictadaTable = pgTable('clase_dictada', {
+	id: integer().generatedAlwaysAsIdentity().primaryKey(),
+	planificacionCursoId: integer('planificacion_curso_id').notNull().references(() => planificacionCursoTable.id),
+	fechaClase: date('fecha_clase', { mode: 'date' }).notNull(),
+	empleadoId: integer('empleado_id').references(() => empleadoTable.id),
+	...timestampsSchema,
+}, (table) => [
+	uniqueIndex('clase_dictada_planificacion_fecha_activa_unique_idx')
+		.on(table.planificacionCursoId, table.fechaClase)
+		.where(sql`${table.borradoEn} is null`),
+	index('idx_clase_dictada_planificacion_curso_id').on(table.planificacionCursoId),
+	index('idx_clase_dictada_empleado_id').on(table.empleadoId),
+]);
+
+export const asistenciaAlumnoTable = pgTable('asistencia_alumno', {
+	id: integer().generatedAlwaysAsIdentity().primaryKey(),
+	claseDictadaId: integer('clase_dictada_id').notNull().references(() => claseDictadaTable.id),
+	inscripcionAlumnoId: integer('inscripcion_alumno_id').notNull().references(() => inscripcionAlumnoTable.id),
+	valor: valorAsistenciaEnum().notNull(),
+	...timestampsSchema,
+}, (table) => [
+	uniqueIndex('asistencia_alumno_clase_inscripcion_activa_unique_idx')
+		.on(table.claseDictadaId, table.inscripcionAlumnoId)
+		.where(sql`${table.borradoEn} is null`),
+	index('idx_asistencia_alumno_clase_dictada_id').on(table.claseDictadaId),
+	index('idx_asistencia_alumno_inscripcion_alumno_id').on(table.inscripcionAlumnoId),
+]);
 
 export const diaSemanaEnum = pgEnum('dia_semana', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']);
 

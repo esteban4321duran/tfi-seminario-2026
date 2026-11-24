@@ -152,8 +152,11 @@ export class InscribirAlumnoRepository {
         isNull(pagoCuotaAlumnoTable.borradoEn),
       ))
       .where(and(
-        eq(inscripcionAlumnoTable.alumnoId, alumnoId),
-        isNull(inscripcionAlumnoTable.borradoEn),
+      eq(inscripcionAlumnoTable.alumnoId, alumnoId),
+      isNull(inscripcionAlumnoTable.borradoEn),
+      isNull(planificacionCursoTable.borradoEn),
+      isNull(cursoTable.borradoEn),
+      isNull(cuotaTable.borradoEn),
       ))
       .groupBy(inscripcionAlumnoTable.id, cuotaTable.id, cuotaTable.mes, cursoTable.nombre, planificacionCursoTable.precioCuota)
       .orderBy(asc(cuotaTable.mes));
@@ -174,6 +177,8 @@ export class InscribirAlumnoRepository {
       .where(and(
         eq(inscripcionAlumnoTable.alumnoId, alumnoId),
         isNull(inscripcionAlumnoTable.borradoEn),
+        isNull(planificacionCursoTable.borradoEn),
+        isNull(cursoTable.borradoEn),
         gte(planificacionCursoTable.fechaFin, new Date()),
       ))
       .limit(1);
